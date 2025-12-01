@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Plus, Settings as SettingsIcon } from 'lucide-react'
 import { storage } from '@/services/storage/local'
-import type { UserProfile, DailyLog } from '@/services/storage/types'
+import { SuggestionsCard } from '@/features/suggestions/SuggestionsCard'
+import type { UserProfile, DailyLog, FoodItem } from '@/services/storage/types'
 
 interface DashboardProps {
     profile: UserProfile
@@ -22,6 +23,16 @@ export function Dashboard({ profile, onAddFood, onSettings }: DashboardProps) {
     const loadTodayLog = async () => {
         const log = await storage.getDailyLog(today)
         setTodayLog(log)
+    }
+
+    const handleQuickAdd = async (food: FoodItem) => {
+        const newFood: FoodItem = {
+            ...food,
+            id: Date.now().toString(),
+            timestamp: Date.now(),
+        }
+        await storage.addFoodToLog(today, newFood)
+        await loadTodayLog()
     }
 
     const consumed = {
@@ -91,6 +102,12 @@ export function Dashboard({ profile, onAddFood, onSettings }: DashboardProps) {
                         unit="g"
                     />
                 </div>
+
+                <SuggestionsCard
+                    profile={profile}
+                    consumed={consumed}
+                    onAddFood={handleQuickAdd}
+                />
 
                 <Card>
                     <CardHeader>
