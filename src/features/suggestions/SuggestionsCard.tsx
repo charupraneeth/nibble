@@ -93,7 +93,7 @@ export function SuggestionsCard({ profile, consumed, onAddFood }: SuggestionsCar
                     <Lightbulb className="h-5 w-5 text-amber-500" />
                     Smart Suggestions
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-xs sm:text-sm">
                     Based on your remaining needs: {Math.round(remaining.calories)} cal, {Math.round(remaining.protein)}g protein
                 </CardDescription>
             </CardHeader>
@@ -101,10 +101,10 @@ export function SuggestionsCard({ profile, consumed, onAddFood }: SuggestionsCar
                 {suggestions.map((suggestion, index) => (
                     <div
                         key={index}
-                        className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
                     >
-                        <div className="flex-1">
-                            <h4 className="font-semibold">{suggestion.food.name}</h4>
+                        <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-sm sm:text-base truncate">{suggestion.food.name}</h4>
                             <p className="text-xs text-muted-foreground mt-1">{suggestion.reason}</p>
                             <p className="text-xs text-muted-foreground mt-1">
                                 {suggestion.food.calories} cal • P: {suggestion.food.protein}g • C: {suggestion.food.carbs}g • F: {suggestion.food.fat}g
@@ -114,6 +114,7 @@ export function SuggestionsCard({ profile, consumed, onAddFood }: SuggestionsCar
                             onClick={() => onAddFood(suggestion.food)}
                             size="sm"
                             variant="outline"
+                            className="w-full sm:w-auto"
                         >
                             Add
                         </Button>

@@ -52,13 +52,13 @@ export function OnboardingForm({ onComplete }: { onComplete: () => void }) {
     return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
             <Card className="w-full max-w-2xl shadow-xl">
-                <CardHeader className="space-y-1">
-                    <CardTitle className="text-3xl font-bold tracking-tight">Welcome to Nibble</CardTitle>
-                    <CardDescription className="text-base">
+                <CardHeader className="space-y-1 px-4 sm:px-6">
+                    <CardTitle className="text-2xl sm:text-3xl font-bold tracking-tight">Welcome to Nibble</CardTitle>
+                    <CardDescription className="text-sm sm:text-base">
                         Let's personalize your nutrition journey
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-4 sm:px-6">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="space-y-2">
                             <Label htmlFor="name">Name</Label>
@@ -112,6 +112,7 @@ export function OnboardingForm({ onComplete }: { onComplete: () => void }) {
                             <RadioGroup
                                 value={formData.gender}
                                 onValueChange={(value) => setFormData({ ...formData, gender: value as typeof formData.gender })}
+                                className="flex flex-col sm:flex-row sm:gap-6"
                             >
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value="male" id="male" />

@@ -254,18 +254,18 @@ export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
     return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
             <Card className="w-full max-w-2xl">
-                <CardHeader>
-                    <CardTitle>Log Your Food</CardTitle>
+                <CardHeader className="px-4 sm:px-6">
+                    <CardTitle className="text-xl sm:text-2xl">Log Your Food</CardTitle>
                     <CardDescription>Choose how you'd like to add your meal</CardDescription>
                 </CardHeader>
                 {error && (
-                    <div className="px-6 pb-4">
+                    <div className="px-4 sm:px-6 pb-4">
                         <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg">
                             <p className="text-sm font-medium">{error}</p>
                         </div>
                     </div>
                 )}
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-4 sm:px-6">
                     <label className="cursor-pointer">
                         <input
                             type="file"

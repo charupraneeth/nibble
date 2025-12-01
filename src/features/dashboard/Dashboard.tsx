@@ -52,24 +52,24 @@ export function Dashboard({ profile, onAddFood, onSettings }: DashboardProps) {
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
             <div className="container mx-auto p-4 space-y-6 max-w-6xl">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-4xl font-bold tracking-tight">Welcome back, {profile.name}</h1>
-                        <p className="text-muted-foreground mt-1">Track your nutrition journey</p>
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">Welcome back, {profile.name}</h1>
+                        <p className="text-muted-foreground mt-1 text-sm sm:text-base">Track your nutrition journey</p>
                     </div>
                     <div className="flex gap-2">
-                        <Button onClick={onSettings} size="lg" variant="outline" className="gap-2">
+                        <Button onClick={onSettings} size="lg" variant="outline" className="gap-2 flex-1 sm:flex-none">
                             <SettingsIcon className="h-5 w-5" />
-                            Settings
+                            <span className="hidden sm:inline">Settings</span>
                         </Button>
-                        <Button onClick={onAddFood} size="lg" className="gap-2">
+                        <Button onClick={onAddFood} size="lg" className="gap-2 flex-1 sm:flex-none">
                             <Plus className="h-5 w-5" />
-                            Log Food
+                            <span className="hidden sm:inline">Log Food</span>
                         </Button>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     <MacroCard
                         title="Calories"
                         consumed={consumed.calories}
