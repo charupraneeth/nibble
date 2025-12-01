@@ -1,73 +1,89 @@
-# React + TypeScript + Vite
+# Nibble - AI Nutrition Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A smart nutrition tracking app with AI-powered food analysis and personalized meal suggestions.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 📸 **Image & Text Analysis** - Upload food photos or describe meals
+- 🤖 **AI Integration** - OpenAI GPT-4 Vision for accurate nutrition data
+- 📊 **Smart Tracking** - Monitor calories, protein, carbs, and fats
+- 💡 **Meal Suggestions** - Get personalized recommendations based on your needs
+- 📱 **Mobile Responsive** - Works great on all devices
+- 🔒 **Privacy First** - Data stored locally in your browser
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend**: React + TypeScript + Vite
+- **Styling**: Tailwind CSS + shadcn/ui
+- **AI**: OpenAI GPT-4 Vision API
+- **Storage**: LocalStorage (Supabase-ready)
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- Node.js 18+ and pnpm
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Installation
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+# Install dependencies
+pnpm install
+
+# Start dev server
+pnpm run dev
+
+# Build for production
+pnpm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Configuration
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. Go to **Settings** in the app
+2. Select **OpenAI (Real Analysis)**
+3. Enter your OpenAI API key from [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Deployment
+
+### Cloudflare Pages
+
+```bash
+# Deploy to production
+pnpm run deploy
+
+# Deploy preview
+pnpm run preview-deploy
 ```
+
+Or connect your GitHub repo to Cloudflare Pages:
+- Build command: `pnpm run build`
+- Build output: `dist`
+
+## Project Structure
+
+```
+src/
+├── features/          # Feature modules
+│   ├── dashboard/     # Main dashboard
+│   ├── food-entry/    # Food logging
+│   ├── onboarding/    # User setup
+│   ├── settings/      # App settings
+│   └── suggestions/   # Meal recommendations
+├── services/          # Service layer
+│   ├── ai/           # AI providers (Mock, OpenAI)
+│   └── storage/      # Storage providers (LocalStorage)
+└── components/       # Reusable UI components
+```
+
+## Future Enhancements
+
+- [ ] Supabase integration for cloud sync
+- [ ] Weekly/monthly analytics
+- [ ] Food database for quick-add
+- [ ] Export data (JSON/CSV)
+- [ ] Water intake tracking
+- [ ] Meal timing labels
+
+## License
+
+MIT
