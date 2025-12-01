@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+import { Plus, Settings as SettingsIcon } from 'lucide-react'
 import { storage } from '@/services/storage/local'
 import type { UserProfile, DailyLog } from '@/services/storage/types'
 
 interface DashboardProps {
     profile: UserProfile
     onAddFood: () => void
+    onSettings: () => void
 }
 
-export function Dashboard({ profile, onAddFood }: DashboardProps) {
+export function Dashboard({ profile, onAddFood, onSettings }: DashboardProps) {
     const [todayLog, setTodayLog] = useState<DailyLog | null>(null)
     const today = new Date().toISOString().split('T')[0]
 
@@ -45,10 +46,16 @@ export function Dashboard({ profile, onAddFood }: DashboardProps) {
                         <h1 className="text-4xl font-bold tracking-tight">Welcome back, {profile.name}</h1>
                         <p className="text-muted-foreground mt-1">Track your nutrition journey</p>
                     </div>
-                    <Button onClick={onAddFood} size="lg" className="gap-2">
-                        <Plus className="h-5 w-5" />
-                        Log Food
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button onClick={onSettings} size="lg" variant="outline" className="gap-2">
+                            <SettingsIcon className="h-5 w-5" />
+                            Settings
+                        </Button>
+                        <Button onClick={onAddFood} size="lg" className="gap-2">
+                            <Plus className="h-5 w-5" />
+                            Log Food
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

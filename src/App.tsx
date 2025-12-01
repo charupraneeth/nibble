@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react'
 import { OnboardingForm } from './features/onboarding/OnboardingForm'
 import { Dashboard } from './features/dashboard/Dashboard'
 import { FoodEntry } from './features/food-entry/FoodEntry'
+import { Settings } from './features/settings/Settings'
 import { storage } from './services/storage/local'
 import type { UserProfile } from './services/storage/types'
 
-type AppView = 'onboarding' | 'dashboard' | 'food-entry'
+type AppView = 'onboarding' | 'dashboard' | 'food-entry' | 'settings'
 
 function App() {
   const [view, setView] = useState<AppView>('onboarding')
@@ -56,8 +57,12 @@ function App() {
     )
   }
 
+  if (view === 'settings') {
+    return <Settings onBack={() => setView('dashboard')} />
+  }
+
   if (profile) {
-    return <Dashboard profile={profile} onAddFood={() => setView('food-entry')} />
+    return <Dashboard profile={profile} onAddFood={() => setView('food-entry')} onSettings={() => setView('settings')} />
   }
 
   return null

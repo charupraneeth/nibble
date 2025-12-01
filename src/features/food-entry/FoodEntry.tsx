@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Camera, FileText, Loader2, ArrowLeft } from 'lucide-react'
-import { aiService } from '@/services/ai/mock'
+import { getAIService } from '@/services/ai'
 import { storage } from '@/services/storage/local'
 import type { NutritionAnalysis } from '@/services/ai/types'
 import type { FoodItem } from '@/services/storage/types'
@@ -17,6 +17,7 @@ interface FoodEntryProps {
 export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
     const [mode, setMode] = useState<'select' | 'image' | 'text' | 'edit'>('select')
     const [loading, setLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
     const [analysis, setAnalysis] = useState<NutritionAnalysis | null>(null)
     const [editData, setEditData] = useState({
         name: '',
@@ -32,7 +33,9 @@ export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
         if (!file) return
 
         setLoading(true)
+        setError(null)
         try {
+            const aiService = getAIService()
             const result = await aiService.analyzeImage(file)
             setAnalysis(result)
             setEditData({
@@ -46,6 +49,7 @@ export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
             setMode('edit')
         } catch (error) {
             console.error('Analysis failed:', error)
+            setError(error instanceof Error ? error.message : 'Failed to analyze image')
         } finally {
             setLoading(false)
         }
@@ -53,7 +57,9 @@ export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
 
     const handleTextAnalysis = async (text: string) => {
         setLoading(true)
+        setError(null)
         try {
+            const aiService = getAIService()
             const result = await aiService.analyzeText(text)
             setAnalysis(result)
             setEditData({
@@ -67,6 +73,7 @@ export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
             setMode('edit')
         } catch (error) {
             console.error('Analysis failed:', error)
+            setError(error instanceof Error ? error.message : 'Failed to analyze text')
         } finally {
             setLoading(false)
         }
@@ -251,6 +258,13 @@ export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
                     <CardTitle>Log Your Food</CardTitle>
                     <CardDescription>Choose how you'd like to add your meal</CardDescription>
                 </CardHeader>
+                {error && (
+                    <div className="px-6 pb-4">
+                        <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg">
+                            <p className="text-sm font-medium">{error}</p>
+                        </div>
+                    </div>
+                )}
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <label className="cursor-pointer">
                         <input
