@@ -8,6 +8,7 @@ export class MockAIService implements AIService {
 
         return {
             name: "Grilled Chicken Salad",
+            weight: 350, // grams
             calories: 450,
             protein: 40,
             carbs: 15,
@@ -22,6 +23,7 @@ export class MockAIService implements AIService {
 
         return {
             name: "Oatmeal with Blueberries",
+            weight: 250, // grams
             calories: 300,
             protein: 10,
             carbs: 50,

@@ -1,5 +1,6 @@
 export interface NutritionAnalysis {
     name: string
+    weight: number // estimated weight in grams
     calories: number
     protein: number
     carbs: number

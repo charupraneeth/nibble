@@ -31,14 +31,21 @@ IMPORTANT: If this image does NOT contain food, return:
 Otherwise, return ONLY a JSON object with this exact structure (no markdown, no code blocks, no explanations):
 {
   "name": "descriptive food name",
-  "calories": number,
-  "protein": number (in grams),
-  "carbs": number (in grams),
-  "fat": number (in grams),
+  "weight": number (estimated total weight of the food in grams),
+  "calories": number (total calories for the estimated weight),
+  "protein": number (total protein in grams for the estimated weight),
+  "carbs": number (total carbs in grams for the estimated weight),
+  "fat": number (total fat in grams for the estimated weight),
   "confidence": number (0-1, your confidence in this analysis)
 }
 
-Be as accurate as possible. If you see multiple items, provide the total for the entire meal.`,
+CRITICAL: Estimate the actual portion size you see in the image. For example:
+- A chicken breast might be 150-200g
+- A bowl of rice might be 200-300g
+- A banana might be 120g
+- A slice of pizza might be 150g
+
+Provide nutrition values for the TOTAL estimated portion, not per 100g.`,
                         },
                         {
                             type: 'image_url',
@@ -74,14 +81,20 @@ Be as accurate as possible. If you see multiple items, provide the total for the
 Return ONLY a JSON object with this exact structure (no markdown, no code blocks):
 {
   "name": "descriptive food name",
-  "calories": number,
-  "protein": number (in grams),
-  "carbs": number (in grams),
-  "fat": number (in grams),
+  "weight": number (estimated weight in grams based on typical serving),
+  "calories": number (total calories for the estimated weight),
+  "protein": number (total protein in grams for the estimated weight),
+  "carbs": number (total carbs in grams for the estimated weight),
+  "fat": number (total fat in grams for the estimated weight),
   "confidence": number (0-1, your confidence in this analysis)
 }
 
-Be as accurate as possible based on typical serving sizes.`,
+Estimate a realistic portion size. For example:
+- "A bowl of oatmeal" = ~250g
+- "Grilled chicken breast" = ~150g
+- "Large apple" = ~200g
+
+Provide nutrition for the TOTAL estimated portion.`,
                 },
             ],
             max_tokens: 500,

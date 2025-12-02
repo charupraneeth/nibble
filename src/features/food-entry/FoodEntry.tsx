@@ -19,6 +19,7 @@ export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [analysis, setAnalysis] = useState<NutritionAnalysis | null>(null)
+    const [originalWeight, setOriginalWeight] = useState<number>(0)
     const [editData, setEditData] = useState({
         name: '',
         calories: '',
@@ -27,6 +28,31 @@ export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
         fat: '',
         weight: '',
     })
+
+    // Scale nutrition values when weight changes
+    const handleWeightChange = (newWeight: string) => {
+        if (!analysis || !originalWeight) {
+            setEditData({ ...editData, weight: newWeight })
+            return
+        }
+
+        const weightNum = Number(newWeight)
+        if (isNaN(weightNum) || weightNum <= 0) {
+            setEditData({ ...editData, weight: newWeight })
+            return
+        }
+
+        // Scale all nutrition values proportionally
+        const ratio = weightNum / originalWeight
+        setEditData({
+            ...editData,
+            weight: newWeight,
+            calories: Math.round(analysis.calories * ratio).toString(),
+            protein: Math.round(analysis.protein * ratio).toString(),
+            carbs: Math.round(analysis.carbs * ratio).toString(),
+            fat: Math.round(analysis.fat * ratio).toString(),
+        })
+    }
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -38,13 +64,14 @@ export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
             const aiService = getAIService()
             const result = await aiService.analyzeImage(file)
             setAnalysis(result)
+            setOriginalWeight(result.weight)
             setEditData({
                 name: result.name,
                 calories: result.calories.toString(),
                 protein: result.protein.toString(),
                 carbs: result.carbs.toString(),
                 fat: result.fat.toString(),
-                weight: '100',
+                weight: result.weight.toString(),
             })
             setMode('edit')
         } catch (error) {
@@ -62,13 +89,14 @@ export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
             const aiService = getAIService()
             const result = await aiService.analyzeText(text)
             setAnalysis(result)
+            setOriginalWeight(result.weight)
             setEditData({
                 name: result.name,
                 calories: result.calories.toString(),
                 protein: result.protein.toString(),
                 carbs: result.carbs.toString(),
                 fat: result.fat.toString(),
-                weight: '100',
+                weight: result.weight.toString(),
             })
             setMode('edit')
         } catch (error) {
@@ -144,8 +172,12 @@ export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
                                     id="weight"
                                     type="number"
                                     value={editData.weight}
-                                    onChange={(e) => setEditData({ ...editData, weight: e.target.value })}
+                                    onChange={(e) => handleWeightChange(e.target.value)}
+                                    placeholder="Adjust portion size"
                                 />
+                                <p className="text-xs text-muted-foreground">
+                                    Nutrition values will scale automatically
+                                </p>
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="calories">Calories</Label>
