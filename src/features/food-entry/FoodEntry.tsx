@@ -3,9 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Camera, FileText, Loader2, ArrowLeft } from 'lucide-react'
+import { Camera, FileText, Loader2, ArrowLeft, Search } from 'lucide-react'
 import { getAIService } from '@/services/ai'
 import { storage } from '@/services/storage/local'
+import { FoodDatabaseSearch } from '@/features/food-database/FoodDatabaseSearch'
 import type { NutritionAnalysis } from '@/services/ai/types'
 import type { FoodItem } from '@/services/storage/types'
 
@@ -15,7 +16,7 @@ interface FoodEntryProps {
 }
 
 export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
-    const [mode, setMode] = useState<'select' | 'image' | 'text' | 'edit'>('select')
+    const [mode, setMode] = useState<'select' | 'image' | 'text' | 'edit' | 'database'>('select')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [analysis, setAnalysis] = useState<NutritionAnalysis | null>(null)
@@ -121,6 +122,12 @@ export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
         }
 
         await storage.addFoodToLog(today, foodItem)
+        onComplete()
+    }
+
+    const handleDatabaseSelect = async (food: FoodItem) => {
+        const today = new Date().toISOString().split('T')[0]
+        await storage.addFoodToLog(today, food)
         onComplete()
     }
 
@@ -283,6 +290,10 @@ export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
         )
     }
 
+    if (mode === 'database') {
+        return <FoodDatabaseSearch onSelect={handleDatabaseSelect} onCancel={() => setMode('select')} />
+    }
+
     return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
             <Card className="w-full max-w-2xl">
@@ -297,7 +308,7 @@ export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
                         </div>
                     </div>
                 )}
-                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-4 sm:px-6">
+                <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4 px-4 sm:px-6">
                     <label className="cursor-pointer">
                         <input
                             type="file"
@@ -326,6 +337,19 @@ export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
                             <h3 className="font-semibold text-lg">Describe Food</h3>
                             <p className="text-sm text-muted-foreground mt-2 text-center">
                                 Type what you ate
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card
+                        className="hover:bg-accent transition-colors border-2 hover:border-primary cursor-pointer"
+                        onClick={() => setMode('database')}
+                    >
+                        <CardContent className="flex flex-col items-center justify-center py-12">
+                            <Search className="h-16 w-16 mb-4 text-primary" />
+                            <h3 className="font-semibold text-lg">Search Database</h3>
+                            <p className="text-sm text-muted-foreground mt-2 text-center">
+                                1,000+ Indian foods
                             </p>
                         </CardContent>
                     </Card>
