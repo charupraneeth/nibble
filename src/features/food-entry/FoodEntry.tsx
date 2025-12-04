@@ -16,7 +16,7 @@ interface FoodEntryProps {
 }
 
 export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
-    const [mode, setMode] = useState<'select' | 'image' | 'text' | 'edit' | 'database'>('select')
+    const [mode, setMode] = useState<'select' | 'ai' | 'edit' | 'database'>('select')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [analysis, setAnalysis] = useState<NutritionAnalysis | null>(null)
@@ -241,22 +241,53 @@ export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
         )
     }
 
-    if (mode === 'text') {
+    if (mode === 'ai') {
         return (
             <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
                 <Card className="w-full max-w-2xl">
-                    <CardHeader>
+                    <CardHeader className="px-4 sm:px-6">
                         <div className="flex items-center gap-2">
                             <Button variant="ghost" size="icon" onClick={() => setMode('select')}>
                                 <ArrowLeft className="h-4 w-4" />
                             </Button>
                             <div>
-                                <CardTitle>Describe Your Food</CardTitle>
-                                <CardDescription>Tell us what you ate</CardDescription>
+                                <CardTitle className="text-xl sm:text-2xl">AI Analysis</CardTitle>
+                                <CardDescription>Upload a photo or describe your food</CardDescription>
                             </div>
                         </div>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="px-4 sm:px-6 space-y-6">
+                        {/* Photo Upload Option */}
+                        <div className="space-y-2">
+                            <Label>Upload Photo</Label>
+                            <label className="cursor-pointer block">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    capture="environment"
+                                    onChange={handleImageUpload}
+                                    className="hidden"
+                                />
+                                <div className="border-2 border-dashed rounded-lg p-8 hover:bg-accent/50 transition-colors text-center">
+                                    <Camera className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
+                                    <p className="font-medium">Click to take photo or upload</p>
+                                    <p className="text-sm text-muted-foreground mt-1">
+                                        AI will analyze the nutrition
+                                    </p>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-background px-2 text-muted-foreground">Or</span>
+                            </div>
+                        </div>
+
+                        {/* Text Description Option */}
                         <form
                             onSubmit={(e) => {
                                 e.preventDefault()
@@ -267,12 +298,12 @@ export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
                             className="space-y-4"
                         >
                             <div className="space-y-2">
-                                <Label htmlFor="description">Description</Label>
+                                <Label htmlFor="description">Describe Your Food</Label>
                                 <Input
                                     id="description"
                                     name="description"
-                                    placeholder="e.g., A bowl of oatmeal with blueberries and honey"
-                                    required
+                                    placeholder="e.g., A bowl of dal with 2 rotis"
+                                    className="h-12"
                                 />
                             </div>
                             <div className="flex gap-3">
@@ -308,35 +339,16 @@ export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
                         </div>
                     </div>
                 )}
-                <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4 px-4 sm:px-6">
-                    <label className="cursor-pointer">
-                        <input
-                            type="file"
-                            accept="image/*"
-                            capture="environment"
-                            onChange={handleImageUpload}
-                            className="hidden"
-                        />
-                        <Card className="hover:bg-accent transition-colors border-2 hover:border-primary">
-                            <CardContent className="flex flex-col items-center justify-center py-12">
-                                <Camera className="h-16 w-16 mb-4 text-primary" />
-                                <h3 className="font-semibold text-lg">Take Photo</h3>
-                                <p className="text-sm text-muted-foreground mt-2 text-center">
-                                    Snap a picture of your meal
-                                </p>
-                            </CardContent>
-                        </Card>
-                    </label>
-
+                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-4 sm:px-6">
                     <Card
                         className="hover:bg-accent transition-colors border-2 hover:border-primary cursor-pointer"
-                        onClick={() => setMode('text')}
+                        onClick={() => setMode('ai')}
                     >
                         <CardContent className="flex flex-col items-center justify-center py-12">
-                            <FileText className="h-16 w-16 mb-4 text-primary" />
-                            <h3 className="font-semibold text-lg">Describe Food</h3>
+                            <Camera className="h-16 w-16 mb-4 text-primary" />
+                            <h3 className="font-semibold text-lg">AI Analysis</h3>
                             <p className="text-sm text-muted-foreground mt-2 text-center">
-                                Type what you ate
+                                Upload photo or describe food
                             </p>
                         </CardContent>
                     </Card>

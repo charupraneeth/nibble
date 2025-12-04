@@ -40,11 +40,40 @@ export function calculateTargets(
     const tdee = Math.round(bmr * ACTIVITY_MULTIPLIERS[activityLevel])
     const targetCalories = tdee + GOAL_MODIFIERS[goal]
 
-    // Standard Macro Split (40% Carbs, 30% Protein, 30% Fat)
-    // Protein: 4 cal/g, Carbs: 4 cal/g, Fat: 9 cal/g
-    const targetProtein = Math.round((targetCalories * 0.3) / 4)
-    const targetCarbs = Math.round((targetCalories * 0.4) / 4)
-    const targetFat = Math.round((targetCalories * 0.3) / 9)
+    // ICMR-NIN 2020 & Indian Context Adjustments
+    // Traditional Indian diet is carb-heavy. We aim for a "Balanced Indian" split
+    // that is achievable but healthier than the typical 70% carb diet.
+
+    let proteinRatio = 0.20
+    let fatRatio = 0.25
+    // Carb ratio is implicit based on remainder
+
+    if (goal === 'lose') {
+        // Higher protein for satiety, lower carbs for deficit
+        proteinRatio = 0.25
+        fatRatio = 0.25
+    } else if (goal === 'gain') {
+        // Higher protein for muscle growth
+        proteinRatio = 0.25
+        fatRatio = 0.25
+    }
+
+    // Calculate raw targets
+    let targetProtein = Math.round((targetCalories * proteinRatio) / 4)
+    const targetFat = Math.round((targetCalories * fatRatio) / 9)
+
+    // Safety Check: ICMR RDA Protein Floor (0.83g/kg)
+    // Ensure we never recommend less than the safe minimum
+    const minProtein = Math.round(weight * 0.83)
+    if (targetProtein < minProtein) {
+        targetProtein = minProtein
+    }
+
+    // Carbs take the remaining calories
+    const proteinCals = targetProtein * 4
+    const fatCals = targetFat * 9
+    const remainingCals = targetCalories - proteinCals - fatCals
+    const targetCarbs = Math.round(remainingCals / 4)
 
     return {
         targetCalories,
