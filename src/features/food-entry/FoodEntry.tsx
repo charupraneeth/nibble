@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Camera, FileText, Loader2, ArrowLeft, Search } from 'lucide-react'
+import { Camera, Loader2, ArrowLeft, Search } from 'lucide-react'
 import { getAIService } from '@/services/ai'
 import { storage } from '@/services/storage/local'
 import { FoodDatabaseSearch } from '@/features/food-database/FoodDatabaseSearch'
