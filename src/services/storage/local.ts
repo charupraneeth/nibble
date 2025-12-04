@@ -29,6 +29,29 @@ export class LocalStorageService implements StorageService {
         log.foods.push(food)
         await this.saveDailyLog(log)
     }
+
+    async removeFoodFromLog(date: string, foodId: string): Promise<void> {
+        const log = await this.getDailyLog(date)
+        if (log) {
+            log.foods = log.foods.filter(f => f.id !== foodId)
+            await this.saveDailyLog(log)
+        }
+    }
+
+    async getAllLogs(): Promise<DailyLog[]> {
+        const logs: DailyLog[] = []
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i)
+            if (key && key.startsWith(KEYS.LOGS)) {
+                const data = localStorage.getItem(key)
+                if (data) {
+                    logs.push(JSON.parse(data))
+                }
+            }
+        }
+        // Sort by date descending (newest first)
+        return logs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    }
 }
 
 export const storage = new LocalStorageService()

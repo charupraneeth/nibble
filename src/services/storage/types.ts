@@ -35,4 +35,6 @@ export interface StorageService {
     getDailyLog(date: string): Promise<DailyLog | null>
     saveDailyLog(log: DailyLog): Promise<void>
     addFoodToLog(date: string, food: FoodItem): Promise<void>
+    removeFoodFromLog(date: string, foodId: string): Promise<void>
+    getAllLogs(): Promise<DailyLog[]>
 }

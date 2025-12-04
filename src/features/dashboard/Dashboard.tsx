@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus, Settings as SettingsIcon } from 'lucide-react'
+import { Plus, Settings as SettingsIcon, Trash2, Calendar } from 'lucide-react'
 import { storage } from '@/services/storage/local'
 import { SuggestionsCard } from '@/features/suggestions/SuggestionsCard'
 import type { UserProfile, DailyLog, FoodItem } from '@/services/storage/types'
@@ -10,9 +10,10 @@ interface DashboardProps {
     profile: UserProfile
     onAddFood: () => void
     onSettings: () => void
+    onHistory: () => void
 }
 
-export function Dashboard({ profile, onAddFood, onSettings }: DashboardProps) {
+export function Dashboard({ profile, onAddFood, onSettings, onHistory }: DashboardProps) {
     const [todayLog, setTodayLog] = useState<DailyLog | null>(null)
     const today = new Date().toISOString().split('T')[0]
 
@@ -33,6 +34,13 @@ export function Dashboard({ profile, onAddFood, onSettings }: DashboardProps) {
         }
         await storage.addFoodToLog(today, newFood)
         await loadTodayLog()
+    }
+
+    const handleDelete = async (foodId: string) => {
+        if (confirm('Are you sure you want to delete this item?')) {
+            await storage.removeFoodFromLog(today, foodId)
+            await loadTodayLog()
+        }
     }
 
     const consumed = {
@@ -58,6 +66,10 @@ export function Dashboard({ profile, onAddFood, onSettings }: DashboardProps) {
                         <p className="text-muted-foreground mt-1 text-sm sm:text-base">Track your nutrition journey</p>
                     </div>
                     <div className="flex gap-2">
+                        <Button onClick={onHistory} size="lg" variant="outline" className="gap-2 flex-1 sm:flex-none">
+                            <Calendar className="h-5 w-5" />
+                            <span className="hidden sm:inline">History</span>
+                        </Button>
                         <Button onClick={onSettings} size="lg" variant="outline" className="gap-2 flex-1 sm:flex-none">
                             <SettingsIcon className="h-5 w-5" />
                             <span className="hidden sm:inline">Settings</span>
@@ -127,17 +139,27 @@ export function Dashboard({ profile, onAddFood, onSettings }: DashboardProps) {
                                 {todayLog.foods.map((food) => (
                                     <div
                                         key={food.id}
-                                        className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                                        className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors group"
                                     >
-                                        <div>
-                                            <h4 className="font-semibold">{food.name}</h4>
+                                        <div className="flex-1 min-w-0 mr-4">
+                                            <h4 className="font-semibold truncate">{food.name}</h4>
                                             <p className="text-sm text-muted-foreground">{food.weight}g</p>
                                         </div>
-                                        <div className="text-right">
-                                            <p className="font-semibold">{food.calories} cal</p>
-                                            <p className="text-xs text-muted-foreground">
-                                                P: {food.protein}g • C: {food.carbs}g • F: {food.fat}g
-                                            </p>
+                                        <div className="flex items-center gap-4">
+                                            <div className="text-right">
+                                                <p className="font-semibold">{food.calories} cal</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    P: {food.protein}g • C: {food.carbs}g • F: {food.fat}g
+                                                </p>
+                                            </div>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                                                onClick={() => handleDelete(food.id)}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
                                         </div>
                                     </div>
                                 ))}
