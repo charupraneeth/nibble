@@ -54,6 +54,7 @@ function App() {
       <FoodEntry
         onComplete={handleFoodEntryComplete}
         onCancel={() => setView('dashboard')}
+        onSettings={() => setView('settings')}
       />
     )
   }

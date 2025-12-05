@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Camera, Loader2, ArrowLeft, Search } from 'lucide-react'
 import { getAIService } from '@/services/ai'
+import { getConfig } from '@/services/config'
 import { storage } from '@/services/storage/local'
 import { FoodDatabaseSearch } from '@/features/food-database/FoodDatabaseSearch'
 import type { NutritionAnalysis } from '@/services/ai/types'
@@ -13,9 +14,10 @@ import type { FoodItem } from '@/services/storage/types'
 interface FoodEntryProps {
     onComplete: () => void
     onCancel: () => void
+    onSettings: () => void
 }
 
-export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
+export function FoodEntry({ onComplete, onCancel, onSettings }: FoodEntryProps) {
     const [mode, setMode] = useState<'select' | 'ai' | 'edit' | 'database'>('select')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -321,6 +323,8 @@ export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
         )
     }
 
+    const hasApiKey = !!getConfig().openaiApiKey
+
     if (mode === 'database') {
         return <FoodDatabaseSearch onSelect={handleDatabaseSelect} onCancel={() => setMode('select')} />
     }
@@ -341,8 +345,11 @@ export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
                 )}
                 <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-4 sm:px-6">
                     <Card
-                        className="hover:bg-accent transition-colors border-2 hover:border-primary cursor-pointer"
-                        onClick={() => setMode('ai')}
+                        className={`transition-colors border-2 cursor-pointer ${hasApiKey
+                            ? 'hover:bg-accent hover:border-primary'
+                            : 'opacity-50 cursor-not-allowed border-muted'
+                            }`}
+                        onClick={() => hasApiKey && setMode('ai')}
                     >
                         <CardContent className="flex flex-col items-center justify-center py-12">
                             <Camera className="h-16 w-16 mb-4 text-primary" />
@@ -350,9 +357,26 @@ export function FoodEntry({ onComplete, onCancel }: FoodEntryProps) {
                             <p className="text-sm text-muted-foreground mt-2 text-center">
                                 Upload photo or describe food
                             </p>
+                            {!hasApiKey && (
+                                <div className="flex flex-col items-center mt-4 gap-2">
+                                    <span className="text-xs bg-destructive/10 text-destructive px-2 py-1 rounded-full font-medium">
+                                        Requires API Key
+                                    </span>
+                                    <Button
+                                        variant="link"
+                                        size="sm"
+                                        className="h-auto p-0 text-primary"
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            onSettings()
+                                        }}
+                                    >
+                                        Configure in Settings
+                                    </Button>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
-
                     <Card
                         className="hover:bg-accent transition-colors border-2 hover:border-primary cursor-pointer"
                         onClick={() => setMode('database')}
