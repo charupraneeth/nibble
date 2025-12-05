@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus, Settings as SettingsIcon, Trash2, Calendar } from 'lucide-react'
+import { Plus, Settings as SettingsIcon, Trash2, Calendar, LogIn } from 'lucide-react'
 import { storage } from '@/services/storage'
 import { SuggestionsCard } from '@/features/suggestions/SuggestionsCard'
 import type { UserProfile, DailyLog, FoodItem } from '@/services/storage/types'
@@ -69,8 +69,9 @@ export function Dashboard({ profile, onAddFood, onSettings, onHistory, onLogin, 
                     </div>
                     <div className="flex gap-2">
                         {!isAuthenticated && (
-                            <Button variant="outline" size="sm" onClick={onLogin}>
-                                Sign In
+                            <Button variant="outline" size="lg" onClick={onLogin} className="gap-2 flex-1 sm:flex-none">
+                                <LogIn className="h-5 w-5" />
+                                <span className="hidden sm:inline">Sign In</span>
                             </Button>
                         )}
                         <Button onClick={onHistory} size="lg" variant="outline" className="gap-2 flex-1 sm:flex-none">
