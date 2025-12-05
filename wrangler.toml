@@ -1,3 +1,7 @@
 name = "nibble"
 pages_build_output_dir = "dist"
 compatibility_date = "2024-12-01"
+
+[vars]
+VITE_SUPABASE_URL = "https://hsqhbvfjxjiwdkwggadl.supabase.co"
+VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzcWhidmZqeGppd2Rrd2dnYWRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ5MzY3OTksImV4cCI6MjA4MDUxMjc5OX0.wyPo1ZQGc36NLYrkPHUKkWEn8D00W1us0tNOTJxifAc"
