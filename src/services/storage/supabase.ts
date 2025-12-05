@@ -91,7 +91,7 @@ export class SupabaseStorageService implements StorageService {
         }
     }
 
-    async saveDailyLog(log: DailyLog): Promise<void> {
+    async saveDailyLog(_log: DailyLog): Promise<void> {
         // This method is rarely used directly in our app flow, usually we use add/remove
         // But for completeness, we could implement it by deleting all for date and re-inserting
         // For now, let's leave it as a no-op or throw, since we verified it's not used.
@@ -121,7 +121,7 @@ export class SupabaseStorageService implements StorageService {
         if (error) throw error
     }
 
-    async removeFoodFromLog(date: string, foodId: string): Promise<void> {
+    async removeFoodFromLog(_date: string, foodId: string): Promise<void> {
         const { data: { session } } = await supabase.auth.getSession()
         if (!session?.user) throw new Error('User not authenticated')
         const user = session.user
