@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Plus, Settings as SettingsIcon, Trash2, Calendar } from 'lucide-react'
-import { storage } from '@/services/storage/local'
+import { storage } from '@/services/storage'
 import { SuggestionsCard } from '@/features/suggestions/SuggestionsCard'
 import type { UserProfile, DailyLog, FoodItem } from '@/services/storage/types'
 
@@ -11,9 +11,11 @@ interface DashboardProps {
     onAddFood: () => void
     onSettings: () => void
     onHistory: () => void
+    onLogin: () => void
+    isAuthenticated: boolean
 }
 
-export function Dashboard({ profile, onAddFood, onSettings, onHistory }: DashboardProps) {
+export function Dashboard({ profile, onAddFood, onSettings, onHistory, onLogin, isAuthenticated }: DashboardProps) {
     const [todayLog, setTodayLog] = useState<DailyLog | null>(null)
     const today = new Date().toISOString().split('T')[0]
 
@@ -43,19 +45,19 @@ export function Dashboard({ profile, onAddFood, onSettings, onHistory }: Dashboa
         }
     }
 
-    const consumed = {
+    const consumed = useMemo(() => ({
         calories: todayLog?.foods.reduce((sum, f) => sum + f.calories, 0) || 0,
         protein: todayLog?.foods.reduce((sum, f) => sum + f.protein, 0) || 0,
         carbs: todayLog?.foods.reduce((sum, f) => sum + f.carbs, 0) || 0,
         fat: todayLog?.foods.reduce((sum, f) => sum + f.fat, 0) || 0,
-    }
+    }), [todayLog])
 
-    const progress = {
+    const progress = useMemo(() => ({
         calories: (consumed.calories / profile.targetCalories) * 100,
         protein: (consumed.protein / profile.targetProtein) * 100,
         carbs: (consumed.carbs / profile.targetCarbs) * 100,
         fat: (consumed.fat / profile.targetFat) * 100,
-    }
+    }), [consumed, profile])
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -66,6 +68,11 @@ export function Dashboard({ profile, onAddFood, onSettings, onHistory }: Dashboa
                         <p className="text-muted-foreground mt-1 text-sm sm:text-base">Track your nutrition journey</p>
                     </div>
                     <div className="flex gap-2">
+                        {!isAuthenticated && (
+                            <Button variant="outline" size="sm" onClick={onLogin}>
+                                Sign In
+                            </Button>
+                        )}
                         <Button onClick={onHistory} size="lg" variant="outline" className="gap-2 flex-1 sm:flex-none">
                             <Calendar className="h-5 w-5" />
                             <span className="hidden sm:inline">History</span>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Calendar, ChevronDown, ChevronUp } from 'lucide-react'
-import { storage } from '@/services/storage/local'
+import { storage } from '@/services/storage'
 import type { DailyLog, UserProfile } from '@/services/storage/types'
 
 interface HistoryProps {

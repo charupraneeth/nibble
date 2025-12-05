@@ -6,10 +6,10 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { calculateTargets } from './utils'
-import { storage } from '@/services/storage/local'
+import { storage } from '@/services/storage'
 import type { UserProfile } from '@/services/storage/types'
 
-export function OnboardingForm({ onComplete }: { onComplete: () => void }) {
+export function OnboardingForm({ onComplete }: { onComplete: (profile: UserProfile) => void }) {
     const [formData, setFormData] = useState({
         name: '',
         age: '',
@@ -46,7 +46,7 @@ export function OnboardingForm({ onComplete }: { onComplete: () => void }) {
         }
 
         await storage.saveUserProfile(profile)
-        onComplete()
+        onComplete(profile)
     }
 
     return (

@@ -54,4 +54,4 @@ export class LocalStorageService implements StorageService {
     }
 }
 
-export const storage = new LocalStorageService()
+export const localStorageService = new LocalStorageService()

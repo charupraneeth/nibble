@@ -4,20 +4,27 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, LogOut } from 'lucide-react'
 import { getConfig, saveConfig } from '@/services/config'
+import { supabase } from '@/lib/supabase'
 import type { AppConfig } from '@/services/config'
+import type { UserProfile } from '@/services/storage/types'
 
 interface SettingsProps {
+    profile: UserProfile
     onBack: () => void
 }
 
-export function Settings({ onBack }: SettingsProps) {
+export function Settings({ profile, onBack }: SettingsProps) {
     const [config, setConfig] = useState<AppConfig>(getConfig())
     const [apiKey, setApiKey] = useState(config.openaiApiKey || '')
+    const [session, setSession] = useState<any>(null)
 
     useEffect(() => {
         setApiKey(config.openaiApiKey || '')
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setSession(session)
+        })
     }, [config])
 
     const handleSave = () => {
@@ -30,6 +37,11 @@ export function Settings({ onBack }: SettingsProps) {
         alert('Settings saved! Changes will take effect on next food analysis.')
     }
 
+    const handleLogout = async () => {
+        await supabase.auth.signOut()
+        onBack()
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
             <div className="container mx-auto p-4 space-y-6 max-w-2xl">
@@ -39,6 +51,29 @@ export function Settings({ onBack }: SettingsProps) {
                     </Button>
                     <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
                 </div>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Account</CardTitle>
+                        <CardDescription>Manage your account and data</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="font-medium">{profile.name}</p>
+                                <p className="text-sm text-muted-foreground">
+                                    {session ? session.user.email : 'Guest User (Local Storage)'}
+                                </p>
+                            </div>
+                            {session && (
+                                <Button variant="destructive" size="sm" onClick={handleLogout}>
+                                    <LogOut className="h-4 w-4 mr-2" />
+                                    Sign Out
+                                </Button>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
 
                 <Card>
                     <CardHeader>

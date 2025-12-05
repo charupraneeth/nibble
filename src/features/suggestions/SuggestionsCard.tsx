@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Lightbulb, TrendingUp } from 'lucide-react'
-import { storage } from '@/services/storage/local'
+import { storage } from '@/services/storage'
 import { calculateRemainingNeeds, generateSuggestions, getAllFoodHistory } from './suggestionEngine'
 import type { UserProfile, FoodItem } from '@/services/storage/types'
 import type { FoodSuggestion } from './suggestionEngine'
@@ -19,7 +19,7 @@ export function SuggestionsCard({ profile, consumed, onAddFood }: SuggestionsCar
 
     useEffect(() => {
         loadSuggestions()
-    }, [consumed])
+    }, [consumed.calories, consumed.protein, consumed.carbs, consumed.fat])
 
     const loadSuggestions = async () => {
         setLoading(true)
