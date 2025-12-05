@@ -4,6 +4,9 @@ import { defineConfig } from "vite"
 
 import { VitePWA } from 'vite-plugin-pwa'
 
+console.log('Build Environment Variables:', Object.keys(process.env).filter(key => key.startsWith('VITE_')))
+
+
 export default defineConfig({
   plugins: [
     react(),
