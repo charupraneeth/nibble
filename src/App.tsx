@@ -100,8 +100,19 @@ function App() {
     )
   }
 
+  const handleProfileUpdate = async (updatedProfile: UserProfile) => {
+    await storage.saveUserProfile(updatedProfile)
+    setProfile(updatedProfile)
+  }
+
   if (view === 'settings' && profile) {
-    return <Settings profile={profile} onBack={() => setView('dashboard')} />
+    return (
+      <Settings
+        profile={profile}
+        onBack={() => setView('dashboard')}
+        onUpdate={handleProfileUpdate}
+      />
+    )
   }
 
   if (view === 'history' && profile) {
