@@ -4,11 +4,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Camera, Loader2, ArrowLeft, Search } from 'lucide-react'
+import { Camera, Loader2, ArrowLeft, Search, ScanBarcode } from 'lucide-react'
 import { getAIService } from '@/services/ai'
 import { getConfig } from '@/services/config'
 import { storage } from '@/services/storage'
 import { FoodDatabaseSearch } from '@/features/food-database/FoodDatabaseSearch'
+import { BarcodeScanner } from '@/features/scanner/BarcodeScanner'
+import { openFoodFactsService } from '@/services/openfoodfacts'
 import type { NutritionAnalysis } from '@/services/ai/types'
 import type { FoodItem } from '@/services/storage/types'
 
@@ -21,7 +23,7 @@ interface FoodEntryProps {
 }
 
 export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthenticated }: FoodEntryProps) {
-    const [mode, setMode] = useState<'select' | 'ai' | 'edit' | 'database'>('select')
+    const [mode, setMode] = useState<'select' | 'ai' | 'edit' | 'database' | 'scanner'>('select')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [analysis, setAnalysis] = useState<NutritionAnalysis | null>(null)
@@ -109,6 +111,44 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
             console.error('Analysis failed:', error)
             setError(error instanceof Error ? error.message : 'Failed to analyze text')
         } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleBarcodeScan = async (barcode: string) => {
+        setMode('select') // Close scanner first or show loading
+        setLoading(true)
+        setError(null)
+        try {
+            const product = await openFoodFactsService.getProductByBarcode(barcode)
+            if (!product) {
+                throw new Error('Product not found in OpenFoodFacts database')
+            }
+
+            // Populate edit data
+            setAnalysis({
+                name: product.name,
+                calories: product.calories,
+                protein: product.protein,
+                carbs: product.carbs,
+                fat: product.fat,
+                weight: product.weight, // default serving size or 100g
+                confidence: 1.0
+            })
+            setOriginalWeight(product.weight)
+            setEditData({
+                name: product.name,
+                calories: product.calories.toString(),
+                protein: product.protein.toString(),
+                carbs: product.carbs.toString(),
+                fat: product.fat.toString(),
+                weight: product.weight.toString(),
+            })
+            setLoading(false)
+            setMode('edit')
+        } catch (error) {
+            console.error('Scan failed:', error)
+            setError(error instanceof Error ? error.message : 'Failed to fetch product data')
             setLoading(false)
         }
     }
@@ -333,6 +373,10 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
         )
     }
 
+    if (mode === 'scanner') {
+        return <BarcodeScanner onResult={handleBarcodeScan} onCancel={() => setMode('select')} />
+    }
+
     const hasApiKey = !!getConfig().openaiApiKey
     const canUseAI = hasApiKey || isAuthenticated
 
@@ -342,7 +386,7 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-            <Card className="w-full max-w-2xl">
+            <Card className="w-full max-w-4xl">
                 <CardHeader className="px-4 sm:px-6">
                     <CardTitle className="text-xl sm:text-2xl">Log Your Food</CardTitle>
                     <CardDescription>Choose how you'd like to add your meal</CardDescription>
@@ -354,7 +398,7 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
                         </div>
                     </div>
                 )}
-                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-4 sm:px-6">
+                <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4 px-4 sm:px-6">
                     <Card
                         className={`transition-colors border-2 cursor-pointer ${canUseAI
                             ? 'hover:bg-accent hover:border-primary'
@@ -362,11 +406,11 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
                             }`}
                         onClick={() => canUseAI && setMode('ai')}
                     >
-                        <CardContent className="flex flex-col items-center justify-center py-12">
-                            <Camera className="h-16 w-16 mb-4 text-primary" />
-                            <h3 className="font-semibold text-lg">AI Analysis</h3>
+                        <CardContent className="flex flex-col items-center justify-center py-8">
+                            <Camera className="h-12 w-12 mb-4 text-primary" />
+                            <h3 className="font-semibold text-lg text-center">AI Analysis</h3>
                             <p className="text-sm text-muted-foreground mt-2 text-center">
-                                Upload photo or describe food
+                                Photo or Description
                             </p>
                             {!canUseAI && (
                                 <div className="flex flex-col items-center mt-4 gap-2 text-center">
@@ -401,15 +445,29 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
                             )}
                         </CardContent>
                     </Card>
+
+                    <Card
+                        className="hover:bg-accent transition-colors border-2 hover:border-primary cursor-pointer"
+                        onClick={() => setMode('scanner')}
+                    >
+                        <CardContent className="flex flex-col items-center justify-center py-8">
+                            <ScanBarcode className="h-12 w-12 mb-4 text-primary" />
+                            <h3 className="font-semibold text-lg text-center">Scan Barcode</h3>
+                            <p className="text-sm text-muted-foreground mt-2 text-center">
+                                Packaged Foods
+                            </p>
+                        </CardContent>
+                    </Card>
+
                     <Card
                         className="hover:bg-accent transition-colors border-2 hover:border-primary cursor-pointer"
                         onClick={() => setMode('database')}
                     >
-                        <CardContent className="flex flex-col items-center justify-center py-12">
-                            <Search className="h-16 w-16 mb-4 text-primary" />
-                            <h3 className="font-semibold text-lg">Search Database</h3>
+                        <CardContent className="flex flex-col items-center justify-center py-8">
+                            <Search className="h-12 w-12 mb-4 text-primary" />
+                            <h3 className="font-semibold text-lg text-center">Search Database</h3>
                             <p className="text-sm text-muted-foreground mt-2 text-center">
-                                1,000+ Indian foods
+                                1,000+ Indian Foods
                             </p>
                         </CardContent>
                     </Card>
