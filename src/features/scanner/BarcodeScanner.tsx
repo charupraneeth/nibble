@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import { Button } from '@/components/ui/button'
-import { X, Loader2 } from 'lucide-react'
+import { X, Loader2, Upload } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 
 interface BarcodeScannerProps {
@@ -115,26 +115,41 @@ export function BarcodeScanner({ onResult, onCancel }: BarcodeScannerProps) {
                     video = document.querySelector('#reader video') as HTMLVideoElement
                 }
 
-                if (video && video.srcObject) {
-                    const stream = video.srcObject as MediaStream
-                    const tracks = stream.getTracks()
-                    tracks.forEach(track => track.stop())
-                    video.srcObject = null
+                if (video) {
+                    // Prevent noisy "onabort" errors from library when we force stop
+                    video.onabort = null
+
+                    if (video.srcObject) {
+                        const stream = video.srcObject as MediaStream
+                        const tracks = stream.getTracks()
+                        tracks.forEach(track => track.stop())
+                        video.srcObject = null
+                    }
                 }
             }
             cleanupMediaStream()
 
             // 2. Tell library to clean up (Cleanup)
             if (scannerRef.current) {
-                scannerRef.current.stop().catch(() => {
-                    // Ignore errors if already stopped or unmounted
-                }).finally(() => {
-                    try {
-                        scannerRef.current?.clear()
-                    } catch {
-                        // Ignore
+                try {
+                    // Check internal state if possible, or just catch the error
+                    // The library throws "scanner is not running" if we call stop() when it's not scanning
+                    // We can check isScanning (if available on the instance type) 
+                    // or just wrap in try/catch and ignore that specific error.
+
+                    if (scannerRef.current.isScanning) {
+                        scannerRef.current.stop().catch((err) => {
+                            console.warn("Scanner stop error:", err)
+                        }).finally(() => {
+                            scannerRef.current?.clear()
+                        })
+                    } else {
+                        // Just clear if not scanning
+                        scannerRef.current.clear()
                     }
-                })
+                } catch (err) {
+                    console.warn("Scanner cleanup error:", err)
+                }
             }
         }
     }, [onResult])
@@ -167,9 +182,77 @@ export function BarcodeScanner({ onResult, onCancel }: BarcodeScannerProps) {
                 </div>
             )}
 
-            <p className="text-white mt-4 text-center text-sm opacity-80">
-                Point camera at a food barcode
-            </p>
+            <div className="text-center mt-4">
+                <p className="text-white text-sm opacity-80 mb-2">
+                    Point camera at a food barcode
+                </p>
+                <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t border-white/20" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-black px-2 text-white/60">Or</span>
+                    </div>
+                </div>
+                <label className="cursor-pointer inline-flex items-center gap-2 mt-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full text-white text-sm transition-colors">
+                    <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                            const file = e.target.files?.[0]
+                            if (!file) return
+
+                            // Scan file
+                            try {
+                                setInitializing(true)
+                                setError(null)
+
+                                // 1. Clean up existing scanner if any (to reset config)
+                                if (scannerRef.current) {
+                                    try {
+                                        if (scannerRef.current.isScanning) {
+                                            await scannerRef.current.stop()
+                                        }
+                                        scannerRef.current.clear()
+                                    } catch (e) {
+                                        console.warn("Pre-file scan cleanup warning:", e)
+                                    }
+                                    scannerRef.current = null
+                                }
+
+                                // 2. Create NEW instance with permissive config + Native API support
+                                const config = {
+                                    experimentalFeatures: {
+                                        useBarCodeDetectorIfSupported: true
+                                    },
+                                    verbose: false
+                                }
+
+                                scannerRef.current = new Html5Qrcode("reader", config)
+
+                                const result = await scannerRef.current.scanFileV2(file, true)
+                                if (result && result.decodedText) {
+                                    onResult(result.decodedText)
+                                }
+                            } catch (err) {
+                                console.error("File scan failed", err)
+                                const msg = err instanceof Error ? err.message : String(err)
+
+                                if (msg.includes("NotFoundException") || msg.includes("No MultiFormat Readers")) {
+                                    setError("No barcode found. Try a clearer image or different angle.")
+                                } else {
+                                    setError("Could not read barcode from image")
+                                }
+                            } finally {
+                                setInitializing(false)
+                            }
+                        }}
+                    />
+                    <Upload className="h-4 w-4" />
+                    Upload Image
+                </label>
+            </div>
         </div>
     )
 }

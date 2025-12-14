@@ -30,20 +30,24 @@ export class OpenFoodFactsService {
         const name = product.product_name_en || product.product_name || 'Unknown Product'
         const brand = product.brands ? ` (${product.brands})` : ''
 
-        // Prefer per 100g values as base, but serving size is useful context
-        // We will default to storing per 100g or per serving?
-        // Our app usually edits 'weight' so storing per 100g (or normalised) is often easier,
-        // but if we have serving size, that's a better default 'weight'.
+        // Defensive parsing for weight
+        let weight = 100
+        if (typeof product.serving_quantity === 'number') {
+            weight = product.serving_quantity
+        } else if (typeof product.serving_quantity === 'string') {
+            // Try to parse string like "30.5" or "30g"
+            const parsed = parseFloat(product.serving_quantity)
+            if (!isNaN(parsed) && parsed > 0) {
+                weight = parsed
+            }
+        }
 
-        const weight = product.serving_quantity || 100
+        const nutriments = product.nutriments || {}
 
-        // Helper to get value prefer serving if available and weight matches serving, else 100g
-        // Actually, let's just grab 100g values and calculate total based on default weight
-
-        const kCal100 = product.nutriments['energy-kcal_100g'] || 0
-        const prot100 = product.nutriments['proteins_100g'] || 0
-        const carb100 = product.nutriments['carbohydrates_100g'] || 0
-        const fat100 = product.nutriments['fat_100g'] || 0
+        const kCal100 = nutriments['energy-kcal_100g'] || 0
+        const prot100 = nutriments['proteins_100g'] || 0
+        const carb100 = nutriments['carbohydrates_100g'] || 0
+        const fat100 = nutriments['fat_100g'] || 0
 
         const ratio = weight / 100
 
