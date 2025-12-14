@@ -4,11 +4,9 @@ import type { AIService, NutritionAnalysis } from './types'
 
 export class OpenAIService implements AIService {
     private client: OpenAI | null = null
-    private apiKey: string | null = null
 
     constructor(apiKey?: string) {
         if (apiKey) {
-            this.apiKey = apiKey
             this.client = new OpenAI({
                 apiKey,
                 dangerouslyAllowBrowser: true, // For client-side usage
