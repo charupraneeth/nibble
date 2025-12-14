@@ -93,9 +93,11 @@ function App() {
   if (view === 'food-entry' && profile) {
     return (
       <FoodEntry
-        onComplete={handleFoodEntryComplete}
+        onComplete={() => setView('dashboard')}
         onCancel={() => setView('dashboard')}
         onSettings={() => setView('settings')}
+        isAuthenticated={!!session}
+        onLogin={() => setView('login')}
       />
     )
   }

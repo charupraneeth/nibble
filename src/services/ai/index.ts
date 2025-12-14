@@ -6,7 +6,7 @@ import type { AIService } from './types'
 export function getAIService(): AIService {
     const config = getConfig()
 
-    if (config.aiProvider === 'openai' && config.openaiApiKey) {
+    if (config.aiProvider === 'openai') {
         return new OpenAIService(config.openaiApiKey)
     }
 

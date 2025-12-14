@@ -11,7 +11,7 @@ export function getConfig(): AppConfig {
         return JSON.parse(stored)
     }
     return {
-        aiProvider: 'mock',
+        aiProvider: 'openai',
     }
 }
 

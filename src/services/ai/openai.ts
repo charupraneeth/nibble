@@ -1,19 +1,123 @@
 import OpenAI from 'openai'
+import { supabase } from '@/lib/supabase'
 import type { AIService, NutritionAnalysis } from './types'
 
 export class OpenAIService implements AIService {
-    private client: OpenAI
+    private client: OpenAI | null = null
+    private apiKey: string | null = null
 
-    constructor(apiKey: string) {
-        this.client = new OpenAI({
-            apiKey,
-            dangerouslyAllowBrowser: true, // For client-side usage
-        })
+    constructor(apiKey?: string) {
+        if (apiKey) {
+            this.apiKey = apiKey
+            this.client = new OpenAI({
+                apiKey,
+                dangerouslyAllowBrowser: true, // For client-side usage
+            })
+        }
     }
 
     async analyzeImage(imageFile: File): Promise<NutritionAnalysis> {
         // Convert image to base64
         const base64Image = await this.fileToBase64(imageFile)
+
+        // 1. If Custom Key exists, use Direct OpenAI
+        if (this.client) {
+            return this.analyzeImageDirect(base64Image)
+        }
+
+        // 2. If no Key, try Edge Function (Authentication required)
+        return this.analyzeImageEdge(base64Image)
+    }
+
+    async analyzeText(text: string): Promise<NutritionAnalysis> {
+        // 1. If Custom Key exists, use Direct OpenAI
+        if (this.client) {
+            return this.analyzeTextDirect(text)
+        }
+
+        // 2. If no Key, try Edge Function (Authentication required)
+        return this.analyzeTextEdge(text)
+    }
+
+    // --- EDGE FUNCTION METHODS ---
+
+    private async analyzeImageEdge(base64Image: string): Promise<NutritionAnalysis> {
+        const { data: { session } } = await supabase.auth.getSession()
+
+        if (!session) {
+            throw new Error('Please sign in to use the AI features (5 free scans/day) or provide your own OpenAI API key in Settings.')
+        }
+
+        const { data, error } = await supabase.functions.invoke('analyze-food', {
+            body: { image: base64Image },
+        })
+
+        if (error) {
+            // Handle specific Edge Function errors
+            if (error instanceof Error) {
+                // Supabase functions js client wraps the response error in 'context' if available
+                const context = (error as any).context
+                if (context && context.json) {
+                    const errorBody = await context.json().catch(() => ({}))
+                    if (errorBody.error) {
+                        throw new Error(errorBody.error)
+                    }
+                }
+            }
+
+            if (error.status === 429) {
+                throw new Error('Daily limit reached. Add your own API Key in Settings for unlimited scans.')
+            }
+
+            throw new Error(error.message || 'Failed to connect to AI service')
+        }
+
+        if (data.error) {
+            throw new Error(data.error)
+        }
+
+        return this.parseJSONResponse(JSON.stringify(data))
+    }
+
+    private async analyzeTextEdge(text: string): Promise<NutritionAnalysis> {
+        const { data: { session } } = await supabase.auth.getSession()
+
+        if (!session) {
+            throw new Error('Please sign in to use the AI features (5 free scans/day) or provide your own OpenAI API key in Settings.')
+        }
+
+        const { data, error } = await supabase.functions.invoke('analyze-food', {
+            body: { text },
+        })
+
+        if (error) {
+            if (error instanceof Error) {
+                const context = (error as any).context
+                if (context && context.json) {
+                    const errorBody = await context.json().catch(() => ({}))
+                    if (errorBody.error) {
+                        throw new Error(errorBody.error)
+                    }
+                }
+            }
+
+            if (error.status === 429) {
+                throw new Error('Daily limit reached. Add your own API Key in Settings for unlimited scans.')
+            }
+            throw new Error(error.message || 'Failed to connect to AI service')
+        }
+
+        if (data.error) {
+            throw new Error(data.error)
+        }
+
+        return this.parseJSONResponse(JSON.stringify(data))
+    }
+
+    // --- DIRECT OPENAI METHODS ---
+
+    private async analyzeImageDirect(base64Image: string): Promise<NutritionAnalysis> {
+        if (!this.client) throw new Error('OpenAI client not initialized')
 
         const response = await this.client.chat.completions.create({
             model: 'gpt-4o',
@@ -23,29 +127,7 @@ export class OpenAIService implements AIService {
                     content: [
                         {
                             type: 'text',
-                            text: `Analyze this food image and provide detailed nutrition information. 
-
-IMPORTANT: If this image does NOT contain food, return:
-{"error": "No food detected in image"}
-
-Otherwise, return ONLY a JSON object with this exact structure (no markdown, no code blocks, no explanations):
-{
-  "name": "descriptive food name",
-  "weight": number (estimated total weight of the food in grams),
-  "calories": number (total calories for the estimated weight),
-  "protein": number (total protein in grams for the estimated weight),
-  "carbs": number (total carbs in grams for the estimated weight),
-  "fat": number (total fat in grams for the estimated weight),
-  "confidence": number (0-1, your confidence in this analysis)
-}
-
-CRITICAL: Estimate the actual portion size you see in the image. For example:
-- A chicken breast might be 150-200g
-- A bowl of rice might be 200-300g
-- A banana might be 120g
-- A slice of pizza might be 150g
-
-Provide nutrition values for the TOTAL estimated portion, not per 100g.`,
+                            text: this.getSystemPrompt(),
                         },
                         {
                             type: 'image_url',
@@ -60,54 +142,44 @@ Provide nutrition values for the TOTAL estimated portion, not per 100g.`,
         })
 
         const content = response.choices[0]?.message?.content
-        if (!content) {
-            throw new Error('No response from OpenAI')
-        }
-
-        // Parse the JSON response with error handling
-        const analysis = this.parseJSONResponse(content)
-
-        return analysis
+        if (!content) throw new Error('No response from OpenAI')
+        return this.parseJSONResponse(content)
     }
 
-    async analyzeText(text: string): Promise<NutritionAnalysis> {
+    private async analyzeTextDirect(text: string): Promise<NutritionAnalysis> {
+        if (!this.client) throw new Error('OpenAI client not initialized')
+
         const response = await this.client.chat.completions.create({
             model: 'gpt-4o',
             messages: [
                 {
                     role: 'user',
-                    content: `Analyze this food description and provide detailed nutrition information: "${text}"
-
-Return ONLY a JSON object with this exact structure (no markdown, no code blocks):
-{
-  "name": "descriptive food name",
-  "weight": number (estimated weight in grams based on typical serving),
-  "calories": number (total calories for the estimated weight),
-  "protein": number (total protein in grams for the estimated weight),
-  "carbs": number (total carbs in grams for the estimated weight),
-  "fat": number (total fat in grams for the estimated weight),
-  "confidence": number (0-1, your confidence in this analysis)
-}
-
-Estimate a realistic portion size. For example:
-- "A bowl of oatmeal" = ~250g
-- "Grilled chicken breast" = ~150g
-- "Large apple" = ~200g
-
-Provide nutrition for the TOTAL estimated portion.`,
+                    content: `Analyze this food description and provide detailed nutrition information: "${text}"\n\n${this.getSystemPrompt()}`,
                 },
             ],
             max_tokens: 500,
         })
 
         const content = response.choices[0]?.message?.content
-        if (!content) {
-            throw new Error('No response from OpenAI')
-        }
+        if (!content) throw new Error('No response from OpenAI')
+        return this.parseJSONResponse(content)
+    }
 
-        // Parse the JSON response with error handling
-        const analysis = this.parseJSONResponse(content)
-        return analysis
+    // --- HELPERS ---
+
+    private getSystemPrompt(): string {
+        return `IMPORTANT: If the input does NOT contain/describe food, return: {"error": "No food detected"}
+Otherwise, return ONLY a JSON object with this exact structure (no markdown):
+{
+  "name": "descriptive food name",
+  "weight": number (estimated total grams),
+  "calories": number (total kcals),
+  "protein": number (total protein g),
+  "carbs": number (total carbs g),
+  "fat": number (total fat g),
+  "confidence": number (0-1)
+}
+Estimate realistic portion sizes.`
     }
 
     private parseJSONResponse(content: string): NutritionAnalysis {
@@ -132,7 +204,7 @@ Provide nutrition for the TOTAL estimated portion.`,
             if (error instanceof Error && error.message.includes('error')) {
                 throw error
             }
-            throw new Error('Unable to analyze this image. Please ensure it contains food items.')
+            throw new Error('Unable to analyze result. Please try again.')
         }
     }
 

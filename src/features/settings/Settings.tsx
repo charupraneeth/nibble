@@ -190,26 +190,48 @@ export function Settings({ profile, onBack, onUpdate }: SettingsProps) {
                         </RadioGroup>
 
                         {config.aiProvider === 'openai' && (
-                            <div className="space-y-2 pt-4 border-t">
-                                <Label htmlFor="api-key">OpenAI API Key</Label>
-                                <Input
-                                    id="api-key"
-                                    type="password"
-                                    placeholder="sk-..."
-                                    value={apiKey}
-                                    onChange={(e) => setApiKey(e.target.value)}
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                    Get your API key from{' '}
-                                    <a
-                                        href="https://platform.openai.com/api-keys"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="underline hover:text-foreground"
-                                    >
-                                        platform.openai.com
-                                    </a>
-                                </p>
+                            <div className="space-y-4 pt-4 border-t">
+                                <div className="rounded-md bg-blue-50 p-4 dark:bg-blue-900/20">
+                                    <div className="flex">
+                                        <div className="ml-3">
+                                            <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                                                Active Analysis Mode
+                                            </h3>
+                                            <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
+                                                <ul className="list-disc pl-5 space-y-1">
+                                                    <li>
+                                                        <strong>5 Free Scans/Day:</strong> Automatic if you are signed in (no key needed).
+                                                    </li>
+                                                    <li>
+                                                        <strong>Unlimited Scans:</strong> If you provide your own OpenAI Key below, you'll bypass daily limits.
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="api-key">Custom OpenAI API Key (Optional)</Label>
+                                    <Input
+                                        id="api-key"
+                                        type="password"
+                                        placeholder="sk-... (Leave empty for free tier)"
+                                        value={apiKey}
+                                        onChange={(e) => setApiKey(e.target.value)}
+                                    />
+                                    <p className="text-xs text-muted-foreground">
+                                        Only required if you want unlimited usage. Get one from{' '}
+                                        <a
+                                            href="https://platform.openai.com/api-keys"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="underline hover:text-foreground"
+                                        >
+                                            platform.openai.com
+                                        </a>
+                                    </p>
+                                </div>
                             </div>
                         )}
 

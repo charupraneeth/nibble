@@ -1,3 +1,4 @@
+
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -15,9 +16,11 @@ interface FoodEntryProps {
     onComplete: () => void
     onCancel: () => void
     onSettings: () => void
+    onLogin: () => void
+    isAuthenticated: boolean
 }
 
-export function FoodEntry({ onComplete, onCancel, onSettings }: FoodEntryProps) {
+export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthenticated }: FoodEntryProps) {
     const [mode, setMode] = useState<'select' | 'ai' | 'edit' | 'database'>('select')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -258,6 +261,13 @@ export function FoodEntry({ onComplete, onCancel, onSettings }: FoodEntryProps) 
                             </div>
                         </div>
                     </CardHeader>
+                    {error && (
+                        <div className="px-4 sm:px-6 pb-4">
+                            <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg">
+                                <p className="text-sm font-medium">{error}</p>
+                            </div>
+                        </div>
+                    )}
                     <CardContent className="px-4 sm:px-6 space-y-6">
                         {/* Photo Upload Option */}
                         <div className="space-y-2">
@@ -324,6 +334,7 @@ export function FoodEntry({ onComplete, onCancel, onSettings }: FoodEntryProps) 
     }
 
     const hasApiKey = !!getConfig().openaiApiKey
+    const canUseAI = hasApiKey || isAuthenticated
 
     if (mode === 'database') {
         return <FoodDatabaseSearch onSelect={handleDatabaseSelect} onCancel={() => setMode('select')} />
@@ -345,11 +356,11 @@ export function FoodEntry({ onComplete, onCancel, onSettings }: FoodEntryProps) 
                 )}
                 <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-4 sm:px-6">
                     <Card
-                        className={`transition-colors border-2 cursor-pointer ${hasApiKey
+                        className={`transition-colors border-2 cursor-pointer ${canUseAI
                             ? 'hover:bg-accent hover:border-primary'
-                            : 'opacity-50 cursor-not-allowed border-muted'
+                            : 'opacity-80 border-muted'
                             }`}
-                        onClick={() => hasApiKey && setMode('ai')}
+                        onClick={() => canUseAI && setMode('ai')}
                     >
                         <CardContent className="flex flex-col items-center justify-center py-12">
                             <Camera className="h-16 w-16 mb-4 text-primary" />
@@ -357,22 +368,35 @@ export function FoodEntry({ onComplete, onCancel, onSettings }: FoodEntryProps) 
                             <p className="text-sm text-muted-foreground mt-2 text-center">
                                 Upload photo or describe food
                             </p>
-                            {!hasApiKey && (
-                                <div className="flex flex-col items-center mt-4 gap-2">
-                                    <span className="text-xs bg-destructive/10 text-destructive px-2 py-1 rounded-full font-medium">
-                                        Requires API Key
+                            {!canUseAI && (
+                                <div className="flex flex-col items-center mt-4 gap-2 text-center">
+                                    <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full font-medium">
+                                        Free Scans require Sign In
                                     </span>
-                                    <Button
-                                        variant="link"
-                                        size="sm"
-                                        className="h-auto p-0 text-primary"
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            onSettings()
-                                        }}
-                                    >
-                                        Configure in Settings
-                                    </Button>
+                                    <div className="flex gap-2">
+                                        <Button
+                                            variant="secondary"
+                                            size="sm"
+                                            className="h-8"
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                onLogin()
+                                            }}
+                                        >
+                                            Sign In
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-8"
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                onSettings()
+                                            }}
+                                        >
+                                            Settings
+                                        </Button>
+                                    </div>
                                 </div>
                             )}
                         </CardContent>
