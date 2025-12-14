@@ -15,6 +15,8 @@ export function BarcodeScanner({ onResult, onCancel }: BarcodeScannerProps) {
     const [initializing, setInitializing] = useState(true)
     const mountedRef = useRef(true)
 
+    const videoRef = useRef<HTMLVideoElement | null>(null)
+
     useEffect(() => {
         mountedRef.current = true
         // Initialize scanner
@@ -34,7 +36,15 @@ export function BarcodeScanner({ onResult, onCancel }: BarcodeScannerProps) {
                     return
                 }
 
-                const scanner = new Html5Qrcode("reader")
+                const scanner = new Html5Qrcode("reader", {
+                    formatsToSupport: [
+                        Html5QrcodeSupportedFormats.EAN_13,
+                        Html5QrcodeSupportedFormats.EAN_8,
+                        Html5QrcodeSupportedFormats.UPC_A,
+                        Html5QrcodeSupportedFormats.UPC_E,
+                    ],
+                    verbose: false
+                })
                 scannerRef.current = scanner
 
                 await scanner.start(
@@ -42,20 +52,23 @@ export function BarcodeScanner({ onResult, onCancel }: BarcodeScannerProps) {
                     {
                         fps: 10,
                         qrbox: { width: 250, height: 250 },
-                        aspectRatio: 1.0,
-                        formatsToSupport: [
-                            Html5QrcodeSupportedFormats.EAN_13,
-                            Html5QrcodeSupportedFormats.EAN_8,
-                            Html5QrcodeSupportedFormats.UPC_A,
-                            Html5QrcodeSupportedFormats.UPC_E,
-                        ]
+                        aspectRatio: 1.0
                     },
-                    (decodedText) => {
+                    async (decodedText) => {
                         // Success callback
                         if (mountedRef.current) {
-                            onResult(decodedText)
-                            // Stop scanning after success
-                            scanner.stop().catch(err => console.warn("Failed to stop scanner after success", err))
+                            // Stop scanning immediately upon success to ensure camera is off
+                            try {
+                                await scanner.stop()
+                                scanner.clear()
+                            } catch (err) {
+                                console.warn("Failed to clean stop scanner", err)
+                            }
+
+                            // Only after stopping, trigger the result
+                            if (mountedRef.current) {
+                                onResult(decodedText)
+                            }
                         }
                     },
                     (_errorMessage) => {
@@ -63,11 +76,23 @@ export function BarcodeScanner({ onResult, onCancel }: BarcodeScannerProps) {
                     }
                 )
 
+                // Capture video element reference immediately after start
+                const videoElement = document.querySelector('#reader video') as HTMLVideoElement
+                if (videoElement) {
+                    videoRef.current = videoElement
+                }
+
                 if (mountedRef.current) {
                     setInitializing(false)
                 } else {
                     // If unmounted during start, clean up immediately
-                    scanner.stop().catch(console.error).finally(() => scanner.clear())
+                    scanner.stop().catch(console.error).finally(() => {
+                        try {
+                            scanner.clear()
+                        } catch (e: unknown) {
+                            console.warn("Failed to clear scanner", e)
+                        }
+                    })
                 }
             } catch (err) {
                 console.error("Scanner initialization failed", err)
@@ -82,20 +107,34 @@ export function BarcodeScanner({ onResult, onCancel }: BarcodeScannerProps) {
 
         return () => {
             mountedRef.current = false
-            if (scannerRef.current) {
-                if (scannerRef.current.isScanning) {
-                    scannerRef.current.stop()
-                        .catch(err => console.warn("Failed to stop scanner on unmount", err))
-                        .finally(() => {
-                            scannerRef.current?.clear().catch(err => console.warn("Failed to clear scanner", err))
-                        })
-                } else {
-                    try {
-                        scannerRef.current.clear()
-                    } catch (e) {
-                        // Ignore if clear fails (e.g. not started yet)
-                    }
+
+            // 1. Force hardware off immediately (Priority)
+            const cleanupMediaStream = () => {
+                let video = videoRef.current
+                if (!video) {
+                    video = document.querySelector('#reader video') as HTMLVideoElement
                 }
+
+                if (video && video.srcObject) {
+                    const stream = video.srcObject as MediaStream
+                    const tracks = stream.getTracks()
+                    tracks.forEach(track => track.stop())
+                    video.srcObject = null
+                }
+            }
+            cleanupMediaStream()
+
+            // 2. Tell library to clean up (Cleanup)
+            if (scannerRef.current) {
+                scannerRef.current.stop().catch(() => {
+                    // Ignore errors if already stopped or unmounted
+                }).finally(() => {
+                    try {
+                        scannerRef.current?.clear()
+                    } catch {
+                        // Ignore
+                    }
+                })
             }
         }
     }, [onResult])
