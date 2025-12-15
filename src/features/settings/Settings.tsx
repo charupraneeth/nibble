@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase'
 import { calculateTargets } from '@/features/onboarding/utils'
 import type { AppConfig } from '@/services/config'
 import type { UserProfile } from '@/services/storage/types'
+import packageJson from '../../../package.json'
 
 interface SettingsProps {
     profile: UserProfile
@@ -234,6 +235,12 @@ export function Settings({ profile, onBack, onUpdate }: SettingsProps) {
                                 </div>
                             </div>
                         )}
+
+                        <div className="pt-4 border-t">
+                            <p className="text-sm text-muted-foreground text-center">
+                                Version {packageJson.version}
+                            </p>
+                        </div>
 
                         <Button onClick={handleSave} className="w-full" size="lg">
                             Save Settings

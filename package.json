@@ -1,7 +1,7 @@
 {
   "name": "nibble",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,7 +9,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "deploy": "pnpm run build && wrangler pages deploy dist",
-    "preview-deploy": "pnpm run build && wrangler pages deploy dist --branch=preview"
+    "preview-deploy": "pnpm run build && wrangler pages deploy dist --branch=preview",
+    "version:patch": "npm version patch",
+    "version:minor": "npm version minor",
+    "version:major": "npm version major"
   },
   "dependencies": {
     "@ericblade/quagga2": "^1.11.0",
