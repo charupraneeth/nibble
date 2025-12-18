@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ArrowLeft, LogOut } from 'lucide-react'
 import { getConfig, saveConfig } from '@/services/config'
@@ -158,83 +157,53 @@ export function Settings({ profile, onBack, onUpdate }: SettingsProps) {
                     <CardHeader>
                         <CardTitle>AI Provider</CardTitle>
                         <CardDescription>
-                            Choose between mock data or real AI analysis
+                            AI-powered food analysis using GPT-4 Vision
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                        <RadioGroup
-                            value={config.aiProvider}
-                            onValueChange={(value) => setConfig({ ...config, aiProvider: value as 'mock' | 'openai' })}
-                        >
-                            <div className="flex items-start space-x-3 space-y-0 rounded-md border p-4">
-                                <RadioGroupItem value="mock" id="mock" />
-                                <div className="space-y-1 leading-none">
-                                    <Label htmlFor="mock" className="font-medium cursor-pointer">
-                                        Mock AI (Demo)
-                                    </Label>
-                                    <p className="text-sm text-muted-foreground">
-                                        Returns sample nutrition data for testing
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="flex items-start space-x-3 space-y-0 rounded-md border p-4">
-                                <RadioGroupItem value="openai" id="openai" />
-                                <div className="space-y-1 leading-none">
-                                    <Label htmlFor="openai" className="font-medium cursor-pointer">
-                                        OpenAI (Real Analysis)
-                                    </Label>
-                                    <p className="text-sm text-muted-foreground">
-                                        Uses GPT-4 Vision for accurate food analysis
-                                    </p>
-                                </div>
-                            </div>
-                        </RadioGroup>
-
-                        {config.aiProvider === 'openai' && (
-                            <div className="space-y-4 pt-4 border-t">
-                                <div className="rounded-md bg-blue-50 p-4 dark:bg-blue-900/20">
-                                    <div className="flex">
-                                        <div className="ml-3">
-                                            <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                                                Active Analysis Mode
-                                            </h3>
-                                            <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
-                                                <ul className="list-disc pl-5 space-y-1">
-                                                    <li>
-                                                        <strong>5 Free Scans/Day:</strong> Automatic if you are signed in (no key needed).
-                                                    </li>
-                                                    <li>
-                                                        <strong>Unlimited Scans:</strong> If you provide your own OpenAI Key below, you'll bypass daily limits.
-                                                    </li>
-                                                </ul>
-                                            </div>
+                        <div className="space-y-4">
+                            <div className="rounded-md bg-blue-50 p-4 dark:bg-blue-900/20">
+                                <div className="flex">
+                                    <div className="ml-3">
+                                        <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                                            Active Analysis Mode
+                                        </h3>
+                                        <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
+                                            <ul className="list-disc pl-5 space-y-1">
+                                                <li>
+                                                    <strong>10 Free Scans/Day:</strong> Automatic if you are signed in (no key needed).
+                                                </li>
+                                                <li>
+                                                    <strong>Unlimited Scans:</strong> If you provide your own OpenAI Key below, you'll bypass daily limits.
+                                                </li>
+                                            </ul>
                                         </div>
                                     </div>
                                 </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="api-key">Custom OpenAI API Key (Optional)</Label>
-                                    <Input
-                                        id="api-key"
-                                        type="password"
-                                        placeholder="sk-... (Leave empty for free tier)"
-                                        value={apiKey}
-                                        onChange={(e) => setApiKey(e.target.value)}
-                                    />
-                                    <p className="text-xs text-muted-foreground">
-                                        Only required if you want unlimited usage. Get one from{' '}
-                                        <a
-                                            href="https://platform.openai.com/api-keys"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="underline hover:text-foreground"
-                                        >
-                                            platform.openai.com
-                                        </a>
-                                    </p>
-                                </div>
                             </div>
-                        )}
+
+                            <div className="space-y-2">
+                                <Label htmlFor="apiKey">Custom OpenAI API Key (Optional)</Label>
+                                <Input
+                                    id="apiKey"
+                                    type="password"
+                                    placeholder="sk-..."
+                                    value={apiKey}
+                                    onChange={(e) => setApiKey(e.target.value)}
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    Only required if you want unlimited usage. Get one from{' '}
+                                    <a
+                                        href="https://platform.openai.com/api-keys"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="underline hover:text-foreground"
+                                    >
+                                        platform.openai.com
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
 
                         <div className="pt-4 border-t">
                             <p className="text-sm text-muted-foreground text-center">

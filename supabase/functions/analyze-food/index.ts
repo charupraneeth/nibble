@@ -75,8 +75,8 @@ serve(async (req) => {
             quota = resetQuota
         }
 
-        // Check limit (5 per day)
-        if (quota.count >= 5) {
+        // Check limit (10 per day)
+        if (quota.count >= 10) {
             return new Response(
                 JSON.stringify({ error: 'Daily limit reached. Please try again tomorrow or add your own API key in Settings.' }),
                 { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

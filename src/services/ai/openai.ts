@@ -43,7 +43,7 @@ export class OpenAIService implements AIService {
         const { data: { session } } = await supabase.auth.getSession()
 
         if (!session) {
-            throw new Error('Please sign in to use the AI features (5 free scans/day) or provide your own OpenAI API key in Settings.')
+            throw new Error('Please sign in to use the AI features (10 free scans/day) or provide your own OpenAI API key in Settings.')
         }
 
         const { data, error } = await supabase.functions.invoke('analyze-food', {
@@ -81,7 +81,7 @@ export class OpenAIService implements AIService {
         const { data: { session } } = await supabase.auth.getSession()
 
         if (!session) {
-            throw new Error('Please sign in to use the AI features (5 free scans/day) or provide your own OpenAI API key in Settings.')
+            throw new Error('Please sign in to use the AI features (10 free scans/day) or provide your own OpenAI API key in Settings.')
         }
 
         const { data, error } = await supabase.functions.invoke('analyze-food', {

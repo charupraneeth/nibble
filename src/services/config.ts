@@ -1,5 +1,5 @@
 export interface AppConfig {
-    aiProvider: 'mock' | 'openai'
+    aiProvider: 'openai'
     openaiApiKey?: string
 }
 
