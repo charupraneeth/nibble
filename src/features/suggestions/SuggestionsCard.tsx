@@ -101,7 +101,7 @@ export function SuggestionsCard({ profile, consumed, onAddFood }: SuggestionsCar
                 {suggestions.map((suggestion, index) => (
                     <div
                         key={index}
-                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 rounded-lg border bg-card hover:bg-primary/10 transition-colors"
                     >
                         <div className="flex-1 min-w-0">
                             <h4 className="font-semibold text-sm sm:text-base truncate">{suggestion.food.name}</h4>

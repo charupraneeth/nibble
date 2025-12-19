@@ -78,7 +78,7 @@ export function History({ profile, onBack }: HistoryProps) {
                             return (
                                 <Card key={log.date} className="overflow-hidden transition-all">
                                     <div
-                                        className="p-4 flex items-center justify-between cursor-pointer hover:bg-accent/50 transition-colors"
+                                        className="p-4 flex items-center justify-between cursor-pointer hover:bg-primary/10 transition-colors"
                                         onClick={() => toggleExpand(log.date)}
                                     >
                                         <div className="flex-1">

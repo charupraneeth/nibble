@@ -86,7 +86,7 @@ export function FoodDatabaseSearch({ onSelect, onCancel }: FoodDatabaseSearchPro
                             {results.map((food) => (
                                 <div
                                     key={food.id}
-                                    className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer"
+                                    className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-primary/10 transition-colors cursor-pointer"
                                     onClick={() => handleSelect(food)}
                                 >
                                     <div className="flex-1 min-w-0">

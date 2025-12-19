@@ -149,7 +149,7 @@ export function Dashboard({ profile, onAddFood, onSettings, onHistory, onLogin, 
                                 {todayLog.foods.map((food) => (
                                     <div
                                         key={food.id}
-                                        className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors group"
+                                        className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-primary/10 transition-colors group"
                                     >
                                         <div className="flex-1 min-w-0 mr-4">
                                             <h4 className="font-semibold truncate">{food.name}</h4>

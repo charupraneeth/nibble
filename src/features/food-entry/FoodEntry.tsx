@@ -469,7 +469,7 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
                                     onChange={handleImageUpload}
                                     className="hidden"
                                 />
-                                <div className="border-2 border-dashed rounded-lg p-8 hover:bg-accent/50 transition-colors text-center">
+                                <div className="border-2 border-dashed rounded-lg p-8 hover:bg-primary/10 transition-colors text-center">
                                     <Camera className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
                                     <p className="font-medium">Click to take photo or upload</p>
                                     <p className="text-sm text-muted-foreground mt-1">
@@ -550,7 +550,7 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
                 <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4 px-4 sm:px-6">
                     <Card
                         className={`transition-colors border-2 cursor-pointer ${canUseAI
-                            ? 'hover:bg-accent hover:border-primary'
+                            ? 'hover:bg-primary/10 hover:border-primary'
                             : 'opacity-80 border-muted'
                             }`}
                         onClick={() => canUseAI && setMode('ai')}
@@ -596,7 +596,7 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
                     </Card>
 
                     <Card
-                        className="hover:bg-accent transition-colors border-2 hover:border-primary cursor-pointer"
+                        className="hover:bg-primary/10 transition-colors border-2 hover:border-primary cursor-pointer"
                         onClick={() => setMode('scanner')}
                     >
                         <CardContent className="flex flex-col items-center justify-center py-8">
@@ -609,7 +609,7 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
                     </Card>
 
                     <Card
-                        className="hover:bg-accent transition-colors border-2 hover:border-primary cursor-pointer"
+                        className="hover:bg-primary/10 transition-colors border-2 hover:border-primary cursor-pointer"
                         onClick={() => setMode('database')}
                     >
                         <CardContent className="flex flex-col items-center justify-center py-8">
