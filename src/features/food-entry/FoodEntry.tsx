@@ -273,7 +273,7 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
                 <Card className="w-full max-w-2xl">
                     <CardHeader>
                         <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="icon" onClick={() => setMode('select')}>
+                            <Button variant="ghost" size="icon" onClick={() => initialData ? onCancel() : setMode('select')}>
                                 <ArrowLeft className="h-4 w-4" />
                             </Button>
                             <div>
