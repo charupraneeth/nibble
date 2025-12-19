@@ -203,7 +203,31 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
     const handleDatabaseSelect = async (food: FoodItem) => {
         const today = new Date().toISOString().split('T')[0]
         await storage.addFoodToLog(today, food)
-        onComplete()
+
+        // Trigger Success Animation
+        setIsSuccess(true)
+        setTimeout(() => {
+            onComplete()
+            setIsSuccess(false)
+        }, 1500)
+    }
+
+    // Generic Success View for non-edit modes (Database, etc.)
+    if (isSuccess && mode !== 'edit') {
+        return (
+            <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-hidden relative">
+                <motion.div
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="bg-primary text-primary-foreground rounded-full p-4 shadow-xl"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check">
+                        <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                </motion.div>
+            </div>
+        )
     }
 
     if (loading && mode !== 'edit') {
