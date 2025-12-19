@@ -25,6 +25,27 @@ function App() {
   const [editingItem, setEditingItem] = useState<FoodItem | null>(null)
   const [shouldAnimate, setShouldAnimate] = useState(false)
 
+  // Theme State
+  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('theme') as 'light' | 'dark' | 'system') || 'system'
+    }
+    return 'system'
+  })
+
+  useEffect(() => {
+    const root = window.document.documentElement
+    root.classList.remove('light', 'dark')
+
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      root.classList.add(systemTheme)
+    } else {
+      root.classList.add(theme)
+    }
+    localStorage.setItem('theme', theme)
+  }, [theme])
+
   useEffect(() => {
     // Check active session
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -138,6 +159,8 @@ function App() {
           profile={profile}
           onBack={() => setView('dashboard')}
           onUpdate={handleProfileUpdate}
+          theme={theme}
+          onThemeChange={setTheme}
         />
       )
     }

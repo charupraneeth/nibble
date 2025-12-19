@@ -97,14 +97,14 @@ export function Dashboard({ profile, onAddFood, onSettings, onHistory, onLogin, 
                         consumed={consumed.calories}
                         target={profile.targetCalories}
                         progress={progress.calories}
-                        color="from-orange-500 to-red-500"
+                        color="bg-primary"
                     />
                     <MacroCard
                         title="Protein"
                         consumed={consumed.protein}
                         target={profile.targetProtein}
                         progress={progress.protein}
-                        color="from-blue-500 to-cyan-500"
+                        color="bg-blue-500 dark:bg-blue-400"
                         unit="g"
                     />
                     <MacroCard
@@ -112,7 +112,7 @@ export function Dashboard({ profile, onAddFood, onSettings, onHistory, onLogin, 
                         consumed={consumed.carbs}
                         target={profile.targetCarbs}
                         progress={progress.carbs}
-                        color="from-green-500 to-emerald-500"
+                        color="bg-orange-500 dark:bg-orange-400"
                         unit="g"
                     />
                     <MacroCard
@@ -120,7 +120,7 @@ export function Dashboard({ profile, onAddFood, onSettings, onHistory, onLogin, 
                         consumed={consumed.fat}
                         target={profile.targetFat}
                         progress={progress.fat}
-                        color="from-purple-500 to-pink-500"
+                        color="bg-purple-500 dark:bg-purple-400"
                         unit="g"
                     />
                 </div>
@@ -219,8 +219,8 @@ function MacroCard({
                 </div>
                 <div className="relative h-2 bg-secondary rounded-full overflow-hidden">
                     <div
-                        className={`absolute inset - y - 0 left - 0 bg - gradient - to - r ${color} rounded - full transition - all duration - 500`}
-                        style={{ width: `${clampedProgress}% ` }}
+                        className={`absolute inset-y-0 left-0 ${color} rounded-full transition-all duration-500`}
+                        style={{ width: `${clampedProgress}%` }}
                     />
                 </div>
                 <p className="text-xs text-muted-foreground">

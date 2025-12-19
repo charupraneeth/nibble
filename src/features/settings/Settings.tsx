@@ -16,9 +16,11 @@ interface SettingsProps {
     profile: UserProfile
     onBack: () => void
     onUpdate: (profile: UserProfile) => Promise<void>
+    theme: 'light' | 'dark' | 'system'
+    onThemeChange: (theme: 'light' | 'dark' | 'system') => void
 }
 
-export function Settings({ profile, onBack, onUpdate }: SettingsProps) {
+export function Settings({ profile, onBack, onUpdate, theme, onThemeChange }: SettingsProps) {
     const [config, setConfig] = useState<AppConfig>(getConfig())
     const [apiKey, setApiKey] = useState(config.openaiApiKey || '')
     const [session, setSession] = useState<any>(null)
@@ -81,6 +83,28 @@ export function Settings({ profile, onBack, onUpdate }: SettingsProps) {
                     </Button>
                     <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
                 </div>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Appearance</CardTitle>
+                        <CardDescription>Customize the interface theme</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid gap-2">
+                            <Label>Theme</Label>
+                            <Select value={theme} onValueChange={(v: any) => onThemeChange(v)}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select theme" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="light">Light</SelectItem>
+                                    <SelectItem value="dark">Dark</SelectItem>
+                                    <SelectItem value="system">System Default</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </CardContent>
+                </Card>
 
                 <Card>
                     <CardHeader>
