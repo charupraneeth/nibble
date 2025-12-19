@@ -14,7 +14,7 @@ export default defineConfig({
         name: 'Nibble - AI Nutrition Tracker',
         short_name: 'Nibble',
         description: 'Track your nutrition with AI',
-        theme_color: '#ffffff',
+        theme_color: '#F2F0E9',
         icons: [
           {
             src: 'pwa-192x192.png',
