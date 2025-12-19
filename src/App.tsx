@@ -7,7 +7,9 @@ import { History } from './features/history/History'
 import { Login } from './features/auth/Login'
 import { storage } from '@/services/storage'
 import { supabase } from '@/lib/supabase'
-import type { UserProfile } from './services/storage/types'
+
+import type { UserProfile, FoodItem } from './services/storage/types'
+
 
 type AppView = 'onboarding' | 'dashboard' | 'food-entry' | 'settings' | 'history' | 'login'
 
@@ -16,6 +18,10 @@ function App() {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [session, setSession] = useState<any>(null)
+
+  // Ghost Card State
+
+  const [editingItem, setEditingItem] = useState<FoodItem | null>(null)
 
   useEffect(() => {
     // Check active session
@@ -70,6 +76,13 @@ function App() {
     setView('dashboard')
   }
 
+
+
+  const handleEdit = (item: FoodItem) => {
+    setEditingItem(item)
+    setView('food-entry')
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -89,11 +102,20 @@ function App() {
   if (view === 'food-entry' && profile) {
     return (
       <FoodEntry
-        onComplete={() => setView('dashboard')}
-        onCancel={() => setView('dashboard')}
+        onComplete={() => {
+          setEditingItem(null)
+          setView('dashboard')
+        }}
+        onCancel={() => {
+          setEditingItem(null)
+          setView('dashboard')
+        }}
         onSettings={() => setView('settings')}
         isAuthenticated={!!session}
         onLogin={() => setView('login')}
+
+        initialData={editingItem}
+
       />
     )
   }
@@ -121,11 +143,16 @@ function App() {
     return (
       <Dashboard
         profile={profile}
-        onAddFood={() => setView('food-entry')}
+        onAddFood={() => {
+          setEditingItem(null)
+          setView('food-entry')
+        }}
         onHistory={() => setView('history')}
         onSettings={() => setView('settings')}
         onLogin={() => setView('login')}
         isAuthenticated={!!session}
+
+        onEdit={handleEdit}
       />
     )
   }

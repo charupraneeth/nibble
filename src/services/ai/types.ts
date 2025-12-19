@@ -8,6 +8,8 @@ export interface NutritionAnalysis {
     confidence: number
 }
 
+
+
 export interface AIService {
     analyzeImage(imageFile: File): Promise<NutritionAnalysis>
     analyzeText(text: string): Promise<NutritionAnalysis>

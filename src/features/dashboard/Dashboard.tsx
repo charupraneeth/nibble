@@ -1,7 +1,7 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus, Settings as SettingsIcon, Trash2, Calendar, LogIn } from 'lucide-react'
+import { Plus, Settings as SettingsIcon, Trash2, Calendar, LogIn, Pencil } from 'lucide-react'
 import { storage } from '@/services/storage'
 import { SuggestionsCard } from '@/features/suggestions/SuggestionsCard'
 import type { UserProfile, DailyLog, FoodItem } from '@/services/storage/types'
@@ -13,12 +13,14 @@ interface DashboardProps {
     onHistory: () => void
     onLogin: () => void
     isAuthenticated: boolean
+    onEdit?: (item: FoodItem) => void
 }
 
-export function Dashboard({ profile, onAddFood, onSettings, onHistory, onLogin, isAuthenticated }: DashboardProps) {
+export function Dashboard({ profile, onAddFood, onSettings, onHistory, onLogin, isAuthenticated, onEdit }: DashboardProps) {
     const [todayLog, setTodayLog] = useState<DailyLog | null>(null)
     const today = new Date().toISOString().split('T')[0]
 
+    // Reload when mounted
     useEffect(() => {
         loadTodayLog()
     }, [])
@@ -163,6 +165,14 @@ export function Dashboard({ profile, onAddFood, onSettings, onHistory, onLogin, 
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
+                                                className="text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                                                onClick={() => onEdit?.(food)}
+                                            >
+                                                <Pencil className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
                                                 className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
                                                 onClick={() => handleDelete(food.id)}
                                             >
@@ -209,8 +219,8 @@ function MacroCard({
                 </div>
                 <div className="relative h-2 bg-secondary rounded-full overflow-hidden">
                     <div
-                        className={`absolute inset-y-0 left-0 bg-gradient-to-r ${color} rounded-full transition-all duration-500`}
-                        style={{ width: `${clampedProgress}%` }}
+                        className={`absolute inset - y - 0 left - 0 bg - gradient - to - r ${color} rounded - full transition - all duration - 500`}
+                        style={{ width: `${clampedProgress}% ` }}
                     />
                 </div>
                 <p className="text-xs text-muted-foreground">

@@ -1,5 +1,5 @@
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,22 +20,32 @@ interface FoodEntryProps {
     onSettings: () => void
     onLogin: () => void
     isAuthenticated: boolean
+
+    initialData?: FoodItem | null
 }
 
-export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthenticated }: FoodEntryProps) {
+export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthenticated, initialData }: FoodEntryProps) {
     const [mode, setMode] = useState<'select' | 'ai' | 'edit' | 'database' | 'scanner'>('select')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [analysis, setAnalysis] = useState<NutritionAnalysis | null>(null)
     const [originalWeight, setOriginalWeight] = useState<number>(0)
     const [editData, setEditData] = useState({
-        name: '',
-        calories: '',
-        protein: '',
-        carbs: '',
-        fat: '',
-        weight: '',
+        name: initialData?.name || '',
+        calories: initialData?.calories.toString() || '',
+        protein: initialData?.protein.toString() || '',
+        carbs: initialData?.carbs.toString() || '',
+        fat: initialData?.fat.toString() || '',
+        weight: initialData?.weight.toString() || '',
     })
+
+    // Set initial mode if editing
+    useEffect(() => {
+        if (initialData) {
+            setMode('edit')
+            setOriginalWeight(initialData.weight)
+        }
+    }, [initialData])
 
     // Scale nutrition values when weight changes
     const handleWeightChange = (newWeight: string) => {
@@ -66,8 +76,11 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
         const file = e.target.files?.[0]
         if (!file) return
 
+        // Optimistic UI: Show edit screen with skeleton immediately
+        setMode('edit')
         setLoading(true)
         setError(null)
+
         try {
             const aiService = getAIService()
             const result = await aiService.analyzeImage(file)
@@ -81,18 +94,23 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
                 fat: result.fat.toString(),
                 weight: result.weight.toString(),
             })
-            setMode('edit')
+            // Already in edit mode, just turn off loading
         } catch (error) {
             console.error('Analysis failed:', error)
             setError(error instanceof Error ? error.message : 'Failed to analyze image')
+            // Go back to select mode on error so they can try again
+            setMode('select')
         } finally {
             setLoading(false)
         }
     }
 
     const handleTextAnalysis = async (text: string) => {
+        // Optimistic UI: Show edit screen with skeleton immediately
+        setMode('edit')
         setLoading(true)
         setError(null)
+
         try {
             const aiService = getAIService()
             const result = await aiService.analyzeText(text)
@@ -106,10 +124,12 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
                 fat: result.fat.toString(),
                 weight: result.weight.toString(),
             })
-            setMode('edit')
+            // Already in edit mode, loading will flip to false
         } catch (error) {
             console.error('Analysis failed:', error)
             setError(error instanceof Error ? error.message : 'Failed to analyze text')
+            // Go back to select mode on error
+            setMode('select')
         } finally {
             setLoading(false)
         }
@@ -156,14 +176,14 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
     const handleSave = async () => {
         const today = new Date().toISOString().split('T')[0]
         const foodItem: FoodItem = {
-            id: Date.now().toString(),
+            id: initialData?.id || Date.now().toString(),
             name: editData.name,
             calories: Number(editData.calories),
             protein: Number(editData.protein),
             carbs: Number(editData.carbs),
             fat: Number(editData.fat),
             weight: Number(editData.weight),
-            timestamp: Date.now(),
+            timestamp: initialData?.timestamp || Date.now(),
         }
 
         await storage.addFoodToLog(today, foodItem)
@@ -176,7 +196,7 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
         onComplete()
     }
 
-    if (loading) {
+    if (loading && mode !== 'edit') {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
                 <Card className="w-full max-w-md">
@@ -191,6 +211,63 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
     }
 
     if (mode === 'edit') {
+        if (loading) {
+            return (
+                <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+                    <Card className="w-full max-w-2xl">
+                        <CardHeader>
+                            <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="icon" disabled>
+                                    <ArrowLeft className="h-4 w-4" />
+                                </Button>
+                                <div className="space-y-2">
+                                    <div className="h-6 w-32 bg-primary/10 rounded animate-pulse" />
+                                    <div className="h-4 w-48 bg-muted rounded animate-pulse" />
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                                <Label>Food Name</Label>
+                                <div className="h-10 w-full bg-muted rounded animate-pulse" />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Weight (g)</Label>
+                                    <div className="h-10 w-full bg-muted rounded animate-pulse" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Calories</Label>
+                                    <div className="h-10 w-full bg-muted rounded animate-pulse" />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Protein (g)</Label>
+                                    <div className="h-10 w-full bg-muted rounded animate-pulse" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Carbs (g)</Label>
+                                    <div className="h-10 w-full bg-muted rounded animate-pulse" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Fat (g)</Label>
+                                    <div className="h-10 w-full bg-muted rounded animate-pulse" />
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3 pt-4">
+                                <div className="h-11 flex-1 bg-primary/10 rounded animate-pulse" />
+                                <div className="h-11 w-24 bg-muted rounded animate-pulse" />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            )
+        }
+
         return (
             <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
                 <Card className="w-full max-w-2xl">
@@ -291,14 +368,17 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
             <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
                 <Card className="w-full max-w-2xl">
                     <CardHeader className="px-4 sm:px-6">
-                        <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="icon" onClick={() => setMode('select')}>
-                                <ArrowLeft className="h-4 w-4" />
-                            </Button>
-                            <div>
-                                <CardTitle className="text-xl sm:text-2xl">AI Analysis</CardTitle>
-                                <CardDescription>Upload a photo or describe your food</CardDescription>
+                        <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="icon" onClick={() => setMode('select')}>
+                                    <ArrowLeft className="h-4 w-4" />
+                                </Button>
+                                <div>
+                                    <CardTitle className="text-xl sm:text-2xl">AI Analysis</CardTitle>
+                                    <CardDescription>Upload a photo or describe your food</CardDescription>
+                                </div>
                             </div>
+
                         </div>
                     </CardHeader>
                     {error && (
