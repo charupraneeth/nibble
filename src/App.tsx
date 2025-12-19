@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { OnboardingForm } from './features/onboarding/OnboardingForm'
 import { Dashboard } from './features/dashboard/Dashboard'
 import { FoodEntry } from './features/food-entry/FoodEntry'
@@ -22,6 +23,7 @@ function App() {
   // Ghost Card State
 
   const [editingItem, setEditingItem] = useState<FoodItem | null>(null)
+  const [shouldAnimate, setShouldAnimate] = useState(false)
 
   useEffect(() => {
     // Check active session
@@ -42,6 +44,14 @@ function App() {
     })
 
     return () => subscription.unsubscribe()
+  }, [view])
+
+  useEffect(() => {
+    // Reset animation flag after transition
+    if (shouldAnimate) {
+      const timer = setTimeout(() => setShouldAnimate(false), 500)
+      return () => clearTimeout(timer)
+    }
   }, [view])
 
   useEffect(() => {
@@ -91,73 +101,87 @@ function App() {
     )
   }
 
-  if (view === 'login') {
-    return <Login />
-  }
 
-  if (view === 'onboarding') {
-    return <OnboardingForm onComplete={handleOnboardingComplete} />
-  }
-
-  if (view === 'food-entry' && profile) {
-    return (
-      <FoodEntry
-        onComplete={() => {
-          setEditingItem(null)
-          setView('dashboard')
-        }}
-        onCancel={() => {
-          setEditingItem(null)
-          setView('dashboard')
-        }}
-        onSettings={() => setView('settings')}
-        isAuthenticated={!!session}
-        onLogin={() => setView('login')}
-
-        initialData={editingItem}
-
-      />
-    )
-  }
 
   const handleProfileUpdate = async (updatedProfile: UserProfile) => {
     await storage.saveUserProfile(updatedProfile)
     setProfile(updatedProfile)
   }
 
-  if (view === 'settings' && profile) {
-    return (
-      <Settings
-        profile={profile}
-        onBack={() => setView('dashboard')}
-        onUpdate={handleProfileUpdate}
-      />
-    )
+  const renderContent = () => {
+    if (view === 'login') return <Login />
+    if (view === 'onboarding') return <OnboardingForm onComplete={handleOnboardingComplete} />
+
+    if (view === 'food-entry' && profile) {
+      return (
+        <FoodEntry
+          onComplete={() => {
+            setEditingItem(null)
+            setShouldAnimate(true)
+            setView('dashboard')
+          }}
+          onCancel={() => {
+            setEditingItem(null)
+            setView('dashboard')
+          }}
+          onSettings={() => setView('settings')}
+          isAuthenticated={!!session}
+          onLogin={() => setView('login')}
+          initialData={editingItem}
+        />
+      )
+    }
+
+    if (view === 'settings' && profile) {
+      return (
+        <Settings
+          profile={profile}
+          onBack={() => setView('dashboard')}
+          onUpdate={handleProfileUpdate}
+        />
+      )
+    }
+
+    if (view === 'history' && profile) {
+      return <History profile={profile} onBack={() => setView('dashboard')} />
+    }
+
+    if (profile) {
+      return (
+        <Dashboard
+          profile={profile}
+          onAddFood={() => {
+            setEditingItem(null)
+            setView('food-entry')
+          }}
+          onHistory={() => setView('history')}
+          onSettings={() => setView('settings')}
+          onLogin={() => setView('login')}
+          isAuthenticated={!!session}
+          onEdit={handleEdit}
+        />
+      )
+    }
+
+    return null
   }
 
-  if (view === 'history' && profile) {
-    return <History profile={profile} onBack={() => setView('dashboard')} />
-  }
-
-  if (profile) {
-    return (
-      <Dashboard
-        profile={profile}
-        onAddFood={() => {
-          setEditingItem(null)
-          setView('food-entry')
-        }}
-        onHistory={() => setView('history')}
-        onSettings={() => setView('settings')}
-        onLogin={() => setView('login')}
-        isAuthenticated={!!session}
-
-        onEdit={handleEdit}
-      />
-    )
-  }
-
-  return null
+  return (
+    <>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={view}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: shouldAnimate ? 0.3 : 0 }}
+          className="min-h-screen"
+        >
+          {renderContent()}
+        </motion.div>
+      </AnimatePresence>
+    </>
+  )
 }
 
 export default App

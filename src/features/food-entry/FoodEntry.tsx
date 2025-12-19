@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -173,6 +174,8 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
         }
     }
 
+    const [isSuccess, setIsSuccess] = useState(false)
+
     const handleSave = async () => {
         const today = new Date().toISOString().split('T')[0]
         const foodItem: FoodItem = {
@@ -187,7 +190,14 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
         }
 
         await storage.addFoodToLog(today, foodItem)
-        onComplete()
+
+        // Trigger Ingestion Animation
+        setIsSuccess(true)
+        setTimeout(() => {
+            onComplete()
+            // Reset state
+            setIsSuccess(false)
+        }, 1500) // Wait for exit animation
     }
 
     const handleDatabaseSelect = async (food: FoodItem) => {
@@ -268,100 +278,135 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
             )
         }
 
+
+
         return (
-            <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-                <Card className="w-full max-w-2xl">
-                    <CardHeader>
-                        <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="icon" onClick={() => initialData ? onCancel() : setMode('select')}>
-                                <ArrowLeft className="h-4 w-4" />
-                            </Button>
-                            <div>
-                                <CardTitle>Review & Edit</CardTitle>
-                                <CardDescription>
-                                    {analysis && `Confidence: ${Math.round(analysis.confidence * 100)}%`}
-                                </CardDescription>
-                            </div>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="food-name">Food Name</Label>
-                            <Input
-                                id="food-name"
-                                value={editData.name}
-                                onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                            />
-                        </div>
+            <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-hidden relative">
+                <AnimatePresence mode="wait">
+                    {!isSuccess ? (
+                        <motion.div
+                            key="edit-card"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{
+                                scale: 0.7,
+                                y: 300,
+                                opacity: 0,
+                                transition: { duration: 0.8, ease: [0.32, 0, 0.67, 0] }
+                            }}
+                            className="w-full max-w-2xl z-10"
+                        >
+                            <Card className="w-full shadow-lg">
+                                <CardHeader>
+                                    <div className="flex items-center gap-2">
+                                        <Button variant="ghost" size="icon" onClick={() => initialData ? onCancel() : setMode('select')}>
+                                            <ArrowLeft className="h-4 w-4" />
+                                        </Button>
+                                        <div>
+                                            <CardTitle>Review & Edit</CardTitle>
+                                            <CardDescription>
+                                                {analysis && `Confidence: ${Math.round(analysis.confidence * 100)}%`}
+                                            </CardDescription>
+                                        </div>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="food-name">Food Name</Label>
+                                        <Input
+                                            id="food-name"
+                                            value={editData.name}
+                                            onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                                        />
+                                    </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="weight">Weight (g)</Label>
-                                <Input
-                                    id="weight"
-                                    type="number"
-                                    value={editData.weight}
-                                    onChange={(e) => handleWeightChange(e.target.value)}
-                                    placeholder="Adjust portion size"
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                    Nutrition values will scale automatically
-                                </p>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="calories">Calories</Label>
-                                <Input
-                                    id="calories"
-                                    type="number"
-                                    value={editData.calories}
-                                    onChange={(e) => setEditData({ ...editData, calories: e.target.value })}
-                                />
-                            </div>
-                        </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="weight">Weight (g)</Label>
+                                            <Input
+                                                id="weight"
+                                                type="number"
+                                                value={editData.weight}
+                                                onChange={(e) => handleWeightChange(e.target.value)}
+                                                placeholder="Adjust portion size"
+                                            />
+                                            <p className="text-xs text-muted-foreground">
+                                                Nutrition values will scale automatically
+                                            </p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="calories">Calories</Label>
+                                            <Input
+                                                id="calories"
+                                                type="number"
+                                                value={editData.calories}
+                                                onChange={(e) => setEditData({ ...editData, calories: e.target.value })}
+                                            />
+                                        </div>
+                                    </div>
 
-                        <div className="grid grid-cols-3 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="protein">Protein (g)</Label>
-                                <Input
-                                    id="protein"
-                                    type="number"
-                                    value={editData.protein}
-                                    onChange={(e) => setEditData({ ...editData, protein: e.target.value })}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="carbs">Carbs (g)</Label>
-                                <Input
-                                    id="carbs"
-                                    type="number"
-                                    value={editData.carbs}
-                                    onChange={(e) => setEditData({ ...editData, carbs: e.target.value })}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="fat">Fat (g)</Label>
-                                <Input
-                                    id="fat"
-                                    type="number"
-                                    value={editData.fat}
-                                    onChange={(e) => setEditData({ ...editData, fat: e.target.value })}
-                                />
-                            </div>
-                        </div>
+                                    <div className="grid grid-cols-3 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="protein">Protein (g)</Label>
+                                            <Input
+                                                id="protein"
+                                                type="number"
+                                                value={editData.protein}
+                                                onChange={(e) => setEditData({ ...editData, protein: e.target.value })}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="carbs">Carbs (g)</Label>
+                                            <Input
+                                                id="carbs"
+                                                type="number"
+                                                value={editData.carbs}
+                                                onChange={(e) => setEditData({ ...editData, carbs: e.target.value })}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="fat">Fat (g)</Label>
+                                            <Input
+                                                id="fat"
+                                                type="number"
+                                                value={editData.fat}
+                                                onChange={(e) => setEditData({ ...editData, fat: e.target.value })}
+                                            />
+                                        </div>
+                                    </div>
 
-                        <div className="flex gap-3 pt-4">
-                            <Button onClick={handleSave} className="flex-1" size="lg">
-                                Save to Log
-                            </Button>
-                            <Button onClick={onCancel} variant="outline" size="lg">
-                                Cancel
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
+                                    <div className="flex gap-3 pt-4">
+                                        <Button onClick={handleSave} className="flex-1" size="lg">
+                                            Save to Log
+                                        </Button>
+                                        <Button onClick={onCancel} variant="outline" size="lg">
+                                            Cancel
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+                    ) : (
+                        <motion.div
+                            key="success"
+                            initial={{ scale: 0.5, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 flex items-center justify-center pointer-events-none z-20"
+                        >
+                            <div className="bg-primary text-primary-foreground rounded-full p-4 shadow-xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check">
+                                    <path d="M20 6 9 17l-5-5" />
+                                </svg>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         )
     }
+
+
 
     if (mode === 'ai') {
         return (
