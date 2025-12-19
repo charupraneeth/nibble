@@ -85,7 +85,7 @@ export function History({ profile, onBack }: HistoryProps) {
                                             <div className="flex items-center gap-2 mb-1">
                                                 <h3 className="font-semibold">{formatDate(log.date)}</h3>
                                                 {log.date === new Date().toISOString().split('T')[0] && (
-                                                    <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
+                                                    <span className="text-xs bg-secondary text-secondary-foreground px-2 py-0.5 rounded-full font-medium">
                                                         Today
                                                     </span>
                                                 )}

@@ -165,7 +165,7 @@ export function Dashboard({ profile, onAddFood, onSettings, onHistory, onLogin, 
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                                                className="text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
                                                 onClick={() => onEdit?.(food)}
                                             >
                                                 <Pencil className="h-4 w-4" />

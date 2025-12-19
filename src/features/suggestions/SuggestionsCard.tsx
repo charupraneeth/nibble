@@ -40,13 +40,13 @@ export function SuggestionsCard({ profile, consumed, onAddFood }: SuggestionsCar
 
     if (!hasRemainingNeeds) {
         return (
-            <Card className="border-green-200 bg-green-50/50 dark:border-green-900 dark:bg-green-950/20">
+            <Card className="border-primary bg-primary text-primary-foreground">
                 <CardHeader>
                     <div className="flex items-center gap-2">
-                        <TrendingUp className="h-5 w-5 text-green-600 dark:text-green-400" />
-                        <CardTitle className="text-green-900 dark:text-green-100">Goals Met!</CardTitle>
+                        <TrendingUp className="h-5 w-5" />
+                        <CardTitle>Goals Met!</CardTitle>
                     </div>
-                    <CardDescription className="text-green-700 dark:text-green-300">
+                    <CardDescription className="text-primary-foreground/80">
                         You've reached your daily nutrition targets. Great job!
                     </CardDescription>
                 </CardHeader>

@@ -556,7 +556,7 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
                         onClick={() => canUseAI && setMode('ai')}
                     >
                         <CardContent className="flex flex-col items-center justify-center py-8">
-                            <Camera className="h-12 w-12 mb-4 text-primary" />
+                            <Camera className="h-12 w-12 mb-4" />
                             <h3 className="font-semibold text-lg text-center">AI Analysis</h3>
                             <p className="text-sm text-muted-foreground mt-2 text-center">
                                 Photo or Description
@@ -600,7 +600,7 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
                         onClick={() => setMode('scanner')}
                     >
                         <CardContent className="flex flex-col items-center justify-center py-8">
-                            <ScanBarcode className="h-12 w-12 mb-4 text-primary" />
+                            <ScanBarcode className="h-12 w-12 mb-4" />
                             <h3 className="font-semibold text-lg text-center">Scan Barcode</h3>
                             <p className="text-sm text-muted-foreground mt-2 text-center">
                                 Packaged Foods
@@ -613,7 +613,7 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
                         onClick={() => setMode('database')}
                     >
                         <CardContent className="flex flex-col items-center justify-center py-8">
-                            <Search className="h-12 w-12 mb-4 text-primary" />
+                            <Search className="h-12 w-12 mb-4" />
                             <h3 className="font-semibold text-lg text-center">Search Database</h3>
                             <p className="text-sm text-muted-foreground mt-2 text-center">
                                 1,000+ Indian Foods
