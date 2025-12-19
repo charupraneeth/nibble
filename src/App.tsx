@@ -35,15 +35,33 @@ function App() {
 
   useEffect(() => {
     const root = window.document.documentElement
-    root.classList.remove('light', 'dark')
+
+    const applyTheme = () => {
+      root.classList.remove('light', 'dark')
+      let effectiveTheme = theme
+
+      if (theme === 'system') {
+        effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      }
+
+      root.classList.add(effectiveTheme)
+
+      // Update meta theme-color for PWA
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', effectiveTheme === 'dark' ? '#1C1C1E' : '#F2F0E9')
+      }
+    }
+
+    applyTheme()
+    localStorage.setItem('theme', theme)
 
     if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-      root.classList.add(systemTheme)
-    } else {
-      root.classList.add(theme)
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+      const handler = () => applyTheme()
+      mediaQuery.addEventListener('change', handler)
+      return () => mediaQuery.removeEventListener('change', handler)
     }
-    localStorage.setItem('theme', theme)
   }, [theme])
 
   useEffect(() => {
