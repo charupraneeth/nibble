@@ -11,6 +11,7 @@ export interface UserProfile {
     targetProtein: number
     targetCarbs: number
     targetFat: number
+    targetFiber?: number // g/day — 14g per 1000 kcal (DRV standard)
 }
 
 export interface DailyLog {
@@ -27,6 +28,8 @@ export interface FoodItem {
     fat: number
     weight: number // grams
     timestamp: number
+    fiber?: number          // g — optional; null means data not available
+    fiberEstimated?: boolean // true when sourced from AI analysis
 }
 
 export interface StorageService {

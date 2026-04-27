@@ -38,7 +38,9 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
         carbs: initialData?.carbs.toString() || '',
         fat: initialData?.fat.toString() || '',
         weight: initialData?.weight.toString() || '',
+        fiber: initialData?.fiber?.toString() || '',
     })
+    const [fiberEstimated, setFiberEstimated] = useState(initialData?.fiberEstimated ?? false)
 
     // Set initial mode if editing
     useEffect(() => {
@@ -70,6 +72,7 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
             protein: Math.round(analysis.protein * ratio).toString(),
             carbs: Math.round(analysis.carbs * ratio).toString(),
             fat: Math.round(analysis.fat * ratio).toString(),
+            fiber: analysis.fiber != null ? (Math.round(analysis.fiber * ratio * 10) / 10).toString() : editData.fiber,
         })
     }
 
@@ -94,7 +97,9 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
                 carbs: result.carbs.toString(),
                 fat: result.fat.toString(),
                 weight: result.weight.toString(),
+                fiber: result.fiber?.toString() || '',
             })
+            setFiberEstimated(true) // AI-sourced fiber is always estimated
             // Already in edit mode, just turn off loading
         } catch (error) {
             console.error('Analysis failed:', error)
@@ -124,7 +129,9 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
                 carbs: result.carbs.toString(),
                 fat: result.fat.toString(),
                 weight: result.weight.toString(),
+                fiber: result.fiber?.toString() || '',
             })
+            setFiberEstimated(true) // AI-sourced fiber is always estimated
             // Already in edit mode, loading will flip to false
         } catch (error) {
             console.error('Analysis failed:', error)
@@ -153,6 +160,7 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
                 protein: product.protein,
                 carbs: product.carbs,
                 fat: product.fat,
+                fiber: product.fiber,
                 weight: product.weight, // default serving size or 100g
                 confidence: 1.0
             })
@@ -164,7 +172,9 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
                 carbs: product.carbs.toString(),
                 fat: product.fat.toString(),
                 weight: product.weight.toString(),
+                fiber: product.fiber?.toString() || '',
             })
+            setFiberEstimated(false) // Barcode fiber is exact from label
             setLoading(false)
             setMode('edit')
         } catch (error) {
@@ -187,6 +197,10 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
             fat: Number(editData.fat),
             weight: Number(editData.weight),
             timestamp: initialData?.timestamp || Date.now(),
+            ...(editData.fiber !== '' && {
+                fiber: Number(editData.fiber),
+                fiberEstimated,
+            }),
         }
 
         await storage.addFoodToLog(today, foodItem)
@@ -397,6 +411,25 @@ export function FoodEntry({ onComplete, onCancel, onSettings, onLogin, isAuthent
                                                 onChange={(e) => setEditData({ ...editData, fat: e.target.value })}
                                             />
                                         </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="fiber">
+                                            Fiber (g)
+                                            {fiberEstimated && editData.fiber && (
+                                                <span className="ml-2 text-xs text-muted-foreground font-normal">est.</span>
+                                            )}
+                                        </Label>
+                                        <Input
+                                            id="fiber"
+                                            type="number"
+                                            value={editData.fiber}
+                                            onChange={(e) => {
+                                                setEditData({ ...editData, fiber: e.target.value })
+                                                setFiberEstimated(false) // user edited = no longer estimated
+                                            }}
+                                            placeholder="Optional"
+                                        />
                                     </div>
 
                                     <div className="flex gap-3 pt-4">

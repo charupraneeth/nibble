@@ -28,6 +28,7 @@ export class SupabaseStorageService implements StorageService {
             targetProtein: data.target_protein,
             targetCarbs: data.target_carbs,
             targetFat: data.target_fat,
+            ...(data.target_fiber != null && { targetFiber: data.target_fiber }),
         }
     }
 
@@ -52,6 +53,7 @@ export class SupabaseStorageService implements StorageService {
                 target_protein: profile.targetProtein,
                 target_carbs: profile.targetCarbs,
                 target_fat: profile.targetFat,
+                target_fiber: profile.targetFiber ?? null,
                 updated_at: new Date().toISOString(),
             })
 
@@ -83,6 +85,7 @@ export class SupabaseStorageService implements StorageService {
             fat: item.fat,
             weight: item.weight,
             timestamp: item.timestamp,
+            ...(item.fiber != null && { fiber: item.fiber, fiberEstimated: item.fiber_estimated ?? false }),
         }))
 
         return {
@@ -108,7 +111,7 @@ export class SupabaseStorageService implements StorageService {
             .insert({
                 user_id: user.id,
                 date: date,
-                id: food.id, // Use client-generated ID or let DB generate? Client ID is fine for now
+                id: food.id,
                 name: food.name,
                 calories: food.calories,
                 protein: food.protein,
@@ -116,6 +119,8 @@ export class SupabaseStorageService implements StorageService {
                 fat: food.fat,
                 weight: food.weight,
                 timestamp: food.timestamp,
+                fiber: food.fiber ?? null,
+                fiber_estimated: food.fiberEstimated ?? false,
             })
 
         if (error) throw error
@@ -164,6 +169,7 @@ export class SupabaseStorageService implements StorageService {
                 fat: item.fat,
                 weight: item.weight,
                 timestamp: item.timestamp,
+                ...(item.fiber != null && { fiber: item.fiber, fiberEstimated: item.fiber_estimated ?? false }),
             })
             logsMap.set(item.date, foods)
         })

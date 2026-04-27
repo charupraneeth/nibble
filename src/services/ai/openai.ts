@@ -175,6 +175,7 @@ Otherwise, return ONLY a JSON object with this exact structure (no markdown):
   "protein": number (total protein g),
   "carbs": number (total carbs g),
   "fat": number (total fat g),
+  "fiber": number (total dietary fiber g — estimate by food type: legumes ~8g/100g, whole grains ~3g/100g, vegetables ~2g/100g, fruits ~2g/100g, refined grains/meat/dairy ~0-1g/100g),
   "confidence": number (0-1)
 }
 Estimate realistic portion sizes.`

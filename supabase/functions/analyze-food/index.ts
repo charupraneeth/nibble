@@ -95,7 +95,7 @@ serve(async (req) => {
         const messages = [
             {
                 role: "system",
-                content: "You are a nutritionist. Analyze the image or text and return a JSON object with: name (string, descriptive food name), calories (number), protein (number), fat (number), carbs (number), weight (number, estimated total weight in grams), confidence (number, 0-1). Return ONLY valid JSON, no markdown."
+                content: "You are a nutritionist. Analyze the image or text and return a JSON object with: name (string, descriptive food name), calories (number), protein (number), fat (number), carbs (number), fiber (number, dietary fiber in grams — estimate by food type: legumes ~8g/100g, whole grains ~3g/100g, vegetables/fruits ~2g/100g, refined grains/meat/dairy ~0-1g/100g), weight (number, estimated total weight in grams), confidence (number, 0-1). Return ONLY valid JSON, no markdown."
             },
             {
                 role: "user",

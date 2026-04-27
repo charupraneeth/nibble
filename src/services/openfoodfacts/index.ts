@@ -48,6 +48,7 @@ export class OpenFoodFactsService {
         const prot100 = nutriments['proteins_100g'] || 0
         const carb100 = nutriments['carbohydrates_100g'] || 0
         const fat100 = nutriments['fat_100g'] || 0
+        const fiber100 = nutriments['fiber_100g']
 
         const ratio = weight / 100
 
@@ -59,7 +60,11 @@ export class OpenFoodFactsService {
             carbs: Math.round(carb100 * ratio),
             fat: Math.round(fat100 * ratio),
             weight: Number(weight),
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            ...(fiber100 != null && {
+                fiber: Math.round(fiber100 * ratio * 10) / 10, // 1 decimal place
+                fiberEstimated: false,
+            }),
         }
     }
 }

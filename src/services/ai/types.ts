@@ -5,6 +5,7 @@ export interface NutritionAnalysis {
     protein: number
     carbs: number
     fat: number
+    fiber?: number // g — AI estimated
     confidence: number
 }
 

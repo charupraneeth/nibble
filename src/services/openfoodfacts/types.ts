@@ -11,6 +11,7 @@ export interface OFFProductResponse {
             "proteins_100g"?: number
             "carbohydrates_100g"?: number
             "fat_100g"?: number
+            "fiber_100g"?: number
             "energy-kcal_serving"?: number
             "proteins_serving"?: number
             "carbohydrates_serving"?: number

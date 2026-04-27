@@ -80,5 +80,6 @@ export function calculateTargets(
         targetProtein,
         targetCarbs,
         targetFat,
+        targetFiber: Math.round((targetCalories / 1000) * 14), // 14g per 1000 kcal (DRV standard)
     }
 }

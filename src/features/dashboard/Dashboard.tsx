@@ -52,6 +52,9 @@ export function Dashboard({ profile, onAddFood, onSettings, onHistory, onLogin, 
         protein: todayLog?.foods.reduce((sum, f) => sum + f.protein, 0) || 0,
         carbs: todayLog?.foods.reduce((sum, f) => sum + f.carbs, 0) || 0,
         fat: todayLog?.foods.reduce((sum, f) => sum + f.fat, 0) || 0,
+        fiber: todayLog?.foods.reduce((sum, f) => sum + (f.fiber ?? 0), 0) || 0,
+        fiberHasData: todayLog?.foods.some(f => f.fiber != null) || false,
+        fiberHasEstimates: todayLog?.foods.some(f => f.fiber != null && f.fiberEstimated) || false,
     }), [todayLog])
 
     const progress = useMemo(() => ({
@@ -59,6 +62,7 @@ export function Dashboard({ profile, onAddFood, onSettings, onHistory, onLogin, 
         protein: (consumed.protein / profile.targetProtein) * 100,
         carbs: (consumed.carbs / profile.targetCarbs) * 100,
         fat: (consumed.fat / profile.targetFat) * 100,
+        fiber: profile.targetFiber ? (consumed.fiber / profile.targetFiber) * 100 : 0,
     }), [consumed, profile])
 
     return (
@@ -91,7 +95,7 @@ export function Dashboard({ profile, onAddFood, onSettings, onHistory, onLogin, 
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className={`grid gap-3 sm:gap-4 ${profile.targetFiber ? 'grid-cols-2 lg:grid-cols-5' : 'grid-cols-2 lg:grid-cols-4'}`}>
                     <MacroCard
                         title="Calories"
                         consumed={consumed.calories}
@@ -123,6 +127,18 @@ export function Dashboard({ profile, onAddFood, onSettings, onHistory, onLogin, 
                         color="bg-purple-500 dark:bg-purple-400"
                         unit="g"
                     />
+                    {profile.targetFiber && (
+                        <MacroCard
+                            title="Fiber"
+                            consumed={Math.round(consumed.fiber * 10) / 10}
+                            target={profile.targetFiber}
+                            progress={progress.fiber}
+                            color="bg-green-500 dark:bg-green-400"
+                            unit="g"
+                            estimated={consumed.fiberHasEstimates}
+                            noData={!consumed.fiberHasData}
+                        />
+                    )}
                 </div>
 
                 <SuggestionsCard
@@ -197,6 +213,8 @@ function MacroCard({
     progress,
     color,
     unit = 'kcal',
+    estimated = false,
+    noData = false,
 }: {
     title: string
     consumed: number
@@ -204,6 +222,8 @@ function MacroCard({
     progress: number
     color: string
     unit?: string
+    estimated?: boolean
+    noData?: boolean
 }) {
     const clampedProgress = Math.min(progress, 100)
 
@@ -213,19 +233,35 @@ function MacroCard({
                 <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-                <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold">{Math.round(consumed)}</span>
-                    <span className="text-muted-foreground">/ {target} {unit}</span>
-                </div>
-                <div className="relative h-2 bg-secondary rounded-full overflow-hidden">
-                    <div
-                        className={`absolute inset-y-0 left-0 ${color} rounded-full transition-all duration-500`}
-                        style={{ width: `${clampedProgress}%` }}
-                    />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                    {Math.round(progress)}% of daily goal
-                </p>
+                {noData ? (
+                    <>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-3xl font-bold text-muted-foreground">—</span>
+                            <span className="text-muted-foreground">/ {target} {unit}</span>
+                        </div>
+                        <div className="relative h-2 bg-secondary rounded-full overflow-hidden" />
+                        <p className="text-xs text-muted-foreground">No data logged yet</p>
+                    </>
+                ) : (
+                    <>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-3xl font-bold">{Math.round(consumed)}</span>
+                            <span className="text-muted-foreground">/ {target} {unit}</span>
+                            {estimated && (
+                                <span className="text-xs text-muted-foreground" title="Some values estimated from AI analysis">est.</span>
+                            )}
+                        </div>
+                        <div className="relative h-2 bg-secondary rounded-full overflow-hidden">
+                            <div
+                                className={`absolute inset-y-0 left-0 ${color} rounded-full transition-all duration-500`}
+                                style={{ width: `${clampedProgress}%` }}
+                            />
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                            {Math.round(progress)}% of daily goal
+                        </p>
+                    </>
+                )}
             </CardContent>
         </Card>
     )
