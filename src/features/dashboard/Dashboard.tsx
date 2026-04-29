@@ -57,13 +57,15 @@ export function Dashboard({ profile, onAddFood, onSettings, onHistory, onLogin, 
         fiberHasEstimates: todayLog?.foods.some(f => f.fiber != null && f.fiberEstimated) || false,
     }), [todayLog])
 
+    const effectiveTargetFiber = profile.targetFiber || Math.round((profile.targetCalories / 1000) * 14)
+
     const progress = useMemo(() => ({
         calories: (consumed.calories / profile.targetCalories) * 100,
         protein: (consumed.protein / profile.targetProtein) * 100,
         carbs: (consumed.carbs / profile.targetCarbs) * 100,
         fat: (consumed.fat / profile.targetFat) * 100,
-        fiber: profile.targetFiber ? (consumed.fiber / profile.targetFiber) * 100 : 0,
-    }), [consumed, profile])
+        fiber: (consumed.fiber / effectiveTargetFiber) * 100,
+    }), [consumed, profile, effectiveTargetFiber])
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -95,7 +97,7 @@ export function Dashboard({ profile, onAddFood, onSettings, onHistory, onLogin, 
                     </div>
                 </div>
 
-                <div className={`grid gap-3 sm:gap-4 ${profile.targetFiber ? 'grid-cols-2 lg:grid-cols-5' : 'grid-cols-2 lg:grid-cols-4'}`}>
+                <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-5">
                     <MacroCard
                         title="Calories"
                         consumed={consumed.calories}
@@ -127,18 +129,16 @@ export function Dashboard({ profile, onAddFood, onSettings, onHistory, onLogin, 
                         color="bg-purple-500 dark:bg-purple-400"
                         unit="g"
                     />
-                    {profile.targetFiber && (
-                        <MacroCard
-                            title="Fiber"
-                            consumed={Math.round(consumed.fiber * 10) / 10}
-                            target={profile.targetFiber}
-                            progress={progress.fiber}
-                            color="bg-green-500 dark:bg-green-400"
-                            unit="g"
-                            estimated={consumed.fiberHasEstimates}
-                            noData={!consumed.fiberHasData}
-                        />
-                    )}
+                    <MacroCard
+                        title="Fiber"
+                        consumed={Math.round(consumed.fiber * 10) / 10}
+                        target={effectiveTargetFiber}
+                        progress={progress.fiber}
+                        color="bg-green-500 dark:bg-green-400"
+                        unit="g"
+                        estimated={consumed.fiberHasEstimates}
+                        noData={!consumed.fiberHasData}
+                    />
                 </div>
 
                 <SuggestionsCard
